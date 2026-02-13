@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务列表 - Audio Label Pro</title>
+    <style>
+        :root {
+            --color-primary: #059669;
+            --color-background: #ECFDF5;
+            --color-white: #FFFFFF;
+            --color-neutral-200: #E5E7EB;
+            --color-neutral-700: #374151;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--color-background);
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .title { font-size: 24px; font-weight: 600; }
+        .btn {
+            padding: 10px 20px;
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .card {
+            background-color: var(--color-white);
+            border: 1px solid var(--color-neutral-200);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #F3F4F6;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .task-item:hover { background-color: #E5E7EB; }
+        .task-info { flex: 1; }
+        .task-name { font-weight: 500; margin-bottom: 5px; }
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            color: var(--color-neutral-700);
+        }
+        .task-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-in-progress { background-color: #E6A23C20; color: #E6A23C; }
+        .status-pending { background-color: #05966920; color: #059669; }
+        .status-completed { background-color: #10B98120; color: #10B981; }
+        .back-link { margin-top: 20px; }
+        .back-link a { color: var(--color-neutral-700); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">任务列表</h1>
+            <div>
+                <button class="btn">新建任务</button>
+                <button class="btn" style="background-color: #3B82F6;">批量分配</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>所有任务</h2>
+            <div class="task-list">
+                <div class="task-item" onclick="window.location.href='page-标注界面.html'">
+                    <div class="task-info">
+                        <div class="task-name">会议录音标注</div>
+                        <div class="task-meta">
+                            <span>分配给: 张三</span>
+                            <span>截止: 明天</span>
+                        </div>
+                    </div>
+                    <span class="task-status status-in-progress">进行中</span>
+                </div>
+                <div class="task-item" onclick="window.location.href='page-审核界面.html'">
+                    <div class="task-info">
+                        <div class="task-name">电话客服审核</div>
+                        <div class="task-meta">
+                            <span>分配给: 李四</span>
+                            <span>截止: 今天</span>
+                        </div>
+                    </div>
+                    <span class="task-status status-pending">待审核</span>
+                </div>
+                <div class="task-item">
+                    <div class="task-info">
+                        <div class="task-name">讲座转录</div>
+                        <div class="task-meta">
+                            <span>分配给: 王五</span>
+                            <span>截止: 昨天</span>
+                        </div>
+                    </div>
+                    <span class="task-status status-completed">已完成</span>
+                </div>
+            </div>
+        </div>
+        <div class="back-link">
+            <a href="index.html">← 返回原型索引</a>
+        </div>
+    </div>
+</body>
+</html>

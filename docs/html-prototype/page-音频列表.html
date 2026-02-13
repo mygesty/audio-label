@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音频列表 - Audio Label Pro</title>
+    <style>
+        :root {
+            --color-primary: #059669;
+            --color-background: #ECFDF5;
+            --color-white: #FFFFFF;
+            --color-neutral-200: #E5E7EB;
+            --color-neutral-700: #374151;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--color-background);
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .title { font-size: 24px; font-weight: 600; }
+        .btn {
+            padding: 10px 20px;
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .card {
+            background-color: var(--color-white);
+            border: 1px solid var(--color-neutral-200);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .file-list { display: flex; flex-direction: column; gap: 10px; }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #F3F4F6;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .file-item:hover { background-color: #E5E7EB; }
+        .back-link { margin-top: 20px; }
+        .back-link a { color: var(--color-neutral-700); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">音频管理</h1>
+            <div>
+                <button class="btn">上传音频</button>
+                <button class="btn">新建文件夹</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>音频文件</h2>
+            <div class="file-list">
+                <div class="file-item" onclick="window.location.href='page-标注界面.html'">
+                    <span>📄 meeting001.mp3</span>
+                    <span>1:23:45</span>
+                </div>
+                <div class="file-item">
+                    <span>📄 meeting002.mp3</span>
+                    <span>2:15:30</span>
+                </div>
+                <div class="file-item">
+                    <span>📄 call001.wav</span>
+                    <span>0:45:20</span>
+                </div>
+            </div>
+        </div>
+        <div class="back-link">
+            <a href="index.html">← 返回原型索引</a>
+        </div>
+    </div>
+</body>
+</html>

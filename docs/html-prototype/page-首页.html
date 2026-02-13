@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - Audio Label Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #059669;
+            --color-primary-light: #10B981;
+            --color-primary-dark: #047857;
+            --color-cta: #F97316;
+            --color-background: #ECFDF5;
+            --color-text: #064E3B;
+            --color-neutral-100: #F3F4F6;
+            --color-neutral-200: #E5E7EB;
+            --color-neutral-300: #D1D5DB;
+            --color-neutral-400: #9CA3AF;
+            --color-neutral-700: #374151;
+            --color-white: #FFFFFF;
+            --color-success: #10B981;
+            --color-warning: #E6A23C;
+
+            --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+
+            --spacing-2: 8px;
+            --spacing-3: 12px;
+            --spacing-4: 16px;
+            --spacing-6: 24px;
+            --spacing-8: 32px;
+
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+            --transition: 200ms ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--color-text);
+            background-color: var(--color-neutral-100);
+            min-height: 100vh;
+            display: grid;
+            grid-template-areas:
+                "header header"
+                "sidebar main";
+            grid-template-columns: 240px 1fr;
+            grid-template-rows: 60px 1fr;
+        }
+
+        /* Header */
+        .header {
+            grid-area: header;
+            background-color: var(--color-white);
+            border-bottom: 1px solid var(--color-neutral-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--spacing-6);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background-color: var(--color-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-white);
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: 8px 16px;
+            background-color: var(--color-neutral-100);
+            border-radius: var(--radius-md);
+            width: 300px;
+        }
+
+        .search-input {
+            border: none;
+            background: none;
+            flex: 1;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-icon {
+            color: var(--color-neutral-400);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            grid-area: sidebar;
+            background-color: var(--color-white);
+            border-right: 1px solid var(--color-neutral-200);
+            padding: var(--spacing-6);
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-size: 14px;
+            color: var(--color-neutral-700);
+        }
+
+        .nav-item:hover {
+            background-color: var(--color-neutral-100);
+        }
+
+        .nav-item.active {
+            background-color: var(--color-background);
+            color: var(--color-primary);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main {
+            grid-area: main;
+            padding: var(--spacing-6);
+            overflow-y: auto;
+        }
+
+        .main-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-6);
+        }
+
+        .main-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-6);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .stat-card {
+            background-color: var(--color-white);
+            border: 1px solid var(--color-neutral-200);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-6);
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: var(--spacing-2);
+        }
+
+        .stat-value.primary {
+            color: var(--color-primary);
+        }
+
+        .stat-value.warning {
+            color: var(--color-warning);
+        }
+
+        .stat-value.success {
+            color: var(--color-success);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--color-neutral-700);
+        }
+
+        /* Tasks Section */
+        .section {
+            background-color: var(--color-white);
+            border: 1px solid var(--color-neutral-200);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-6);
+            box-shadow: var(--shadow-md);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-6);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-4);
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-4);
+            background-color: var(--color-neutral-100);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .task-item:hover {
+            background-color: var(--color-neutral-200);
+        }
+
+        .task-info {
+            flex: 1;
+        }
+
+        .task-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: var(--spacing-2);
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+        }
+
+        .task-status {
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .task-status.in-progress {
+            background-color: #E6A23C20;
+            color: var(--color-warning);
+        }
+
+        .task-status.pending {
+            background-color: #05966920;
+            color: var(--color-primary);
+        }
+
+        .task-status.completed {
+            background-color: #10B98120;
+            color: var(--color-success);
+        }
+
+        .task-progress {
+            flex: 1;
+            max-width: 150px;
+            height: 8px;
+            background-color: var(--color-neutral-300);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .task-progress-bar {
+            height: 100%;
+            background-color: var(--color-primary);
+            transition: width var(--transition);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: var(--spacing-4);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            color: var(--color-white);
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-dark);
+        }
+
+        .btn-success {
+            background-color: var(--color-success);
+        }
+
+        .btn-success:hover {
+            background-color: var(--color-primary-dark);
+        }
+
+        /* Back Link */
+        .back-link {
+            position: fixed;
+            bottom: var(--spacing-6);
+            right: var(--spacing-6);
+            z-index: 1000;
+        }
+
+        .back-link a {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: 8px 16px;
+            background-color: var(--color-white);
+            border: 1px solid var(--color-neutral-200);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--color-neutral-700);
+            text-decoration: none;
+            transition: all var(--transition);
+        }
+
+        .back-link a:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            body {
+                grid-template-areas:
+                    "header"
+                    "main";
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo" onclick="window.location.href='index.html'">
+                <div class="logo-icon">🎙️</div>
+                <div class="logo-text">Audio Label Pro</div>
+            </div>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="搜索音频、任务...">
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="user-avatar" title="用户">U</div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="nav-menu">
+            <div class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span>首页</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">📁</span>
+                <span>项目</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">📋</span>
+                <span>任务</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>统计</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span>设置</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="main-header">
+            <h1 class="main-title">欢迎回来！</h1>
+            <div class="quick-actions">
+                <button class="btn btn-primary">新建项目</button>
+                <button class="btn btn-success" onclick="window.location.href='page-音频列表.html'">上传音频</button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value primary">12</div>
+                <div class="stat-label">项目数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value warning">45</div>
+                <div class="stat-label">进行中</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value success">128</div>
+                <div class="stat-label">已完成</div>
+            </div>
+        </div>
+
+        <!-- Recent Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">最近任务</h2>
+                <a href="page-任务列表.html" style="color: var(--color-primary); text-decoration: none; font-size: 14px;">查看全部</a>
+            </div>
+            <div class="task-list">
+                <div class="task-item" onclick="window.location.href='page-标注界面.html'">
+                    <div class="task-info">
+                        <div class="task-name">会议录音标注</div>
+                        <div class="task-meta">
+                            <span class="task-status in-progress">进行中</span>
+                        </div>
+                    </div>
+                    <div class="task-progress">
+                        <div class="task-progress-bar" style="width: 65%;"></div>
+                    </div>
+                </div>
+                <div class="task-item" onclick="window.location.href='page-审核界面.html'">
+                    <div class="task-info">
+                        <div class="task-name">电话客服审核</div>
+                        <div class="task-meta">
+                            <span class="task-status pending">待审核</span>
+                        </div>
+                    </div>
+                    <div class="task-progress">
+                        <div class="task-progress-bar" style="width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="task-item">
+                    <div class="task-info">
+                        <div class="task-name">讲座转录</div>
+                        <div class="task-meta">
+                            <span class="task-status completed">已完成</span>
+                        </div>
+                    </div>
+                    <div class="task-progress">
+                        <div class="task-progress-bar" style="width: 100%; background-color: var(--color-success);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Back Link -->
+    <div class="back-link">
+        <a href="index.html">
+            <span>←</span>
+            <span>返回原型索引</span>
+        </a>
+    </div>
+</body>
+</html>

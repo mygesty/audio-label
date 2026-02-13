@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>标注界面 - Audio Label Pro</title>
+    <style>
+        :root {
+            --color-primary: #059669;
+            --color-primary-light: #10B981;
+            --color-background: #ECFDF5;
+            --color-white: #FFFFFF;
+            --color-neutral-200: #E5E7EB;
+            --color-neutral-700: #374151;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-background);
+            display: grid;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+        }
+        .toolbar {
+            background-color: var(--color-white);
+            border-bottom: 1px solid var(--color-neutral-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        .toolbar-left { display: flex; align-items: center; gap: 15px; }
+        .audio-info { font-weight: 600; }
+        .btn {
+            padding: 8px 16px;
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background-color: var(--color-primary-light);
+        }
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            overflow: hidden;
+        }
+        .waveform-area {
+            padding: 20px;
+            background-color: var(--color-white);
+            overflow: auto;
+        }
+        .waveform-placeholder {
+            height: 200px;
+            background: linear-gradient(90deg,
+                var(--color-neutral-200) 0%,
+                var(--color-primary-light) 50%,
+                var(--color-neutral-200) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-neutral-700);
+            margin-bottom: 20px;
+        }
+        .annotations-list {
+            background-color: var(--color-white);
+            border-left: 1px solid var(--color-neutral-200);
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .annotation-item {
+            padding: 15px;
+            background-color: #F3F4F6;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .annotation-item:hover { background-color: #E5E7EB; }
+        .annotation-time { font-size: 12px; color: var(--color-neutral-700); }
+        .annotation-text { margin: 5px 0; }
+        .back-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .back-link a {
+            padding: 10px 20px;
+            background-color: var(--color-white);
+            border: 1px solid var(--color-neutral-200);
+            border-radius: 8px;
+            color: var(--color-neutral-700);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <span class="audio-info">meeting001.mp3 | 1:23:45</span>
+            <button class="btn">▶ 播放</button>
+            <button class="btn btn-secondary">⏸ 暂停</button>
+            <button class="btn btn-secondary">⏹ 停止</button>
+        </div>
+        <div class="toolbar-right">
+            <button class="btn">提交审核</button>
+        </div>
+    </div>
+    <div class="main">
+        <div class="waveform-area">
+            <h2>波形显示</h2>
+            <div class="waveform-placeholder">
+                🎵 音频波形图（模拟）
+            </div>
+            <p style="color: var(--color-neutral-700); margin-top: 20px;">
+                这是标注界面的核心区域，显示音频波形和标注信息。<br>
+                支持功能：
+            </p>
+            <ul style="color: var(--color-neutral-700); margin-left: 20px;">
+                <li>在波形上拖拽创建标注</li>
+                <li>点击已有标注进行编辑</li>
+                <li>支持播放速度调节</li>
+                <li>支持 A-B 循环播放</li>
+                <li>显示协作者光标</li>
+            </ul>
+        </div>
+        <div class="annotations-list">
+            <h2>标注列表</h2>
+            <div class="annotation-item">
+                <div class="annotation-time">00:15 - 00:45</div>
+                <div class="annotation-text">大家好，我是张三。今天我们要讨论一下这个项目的进度。</div>
+                <div style="font-size: 12px; color: var(--color-primary);">🏷️ 3个标签 | 👤 说话人1</div>
+            </div>
+            <div class="annotation-item">
+                <div class="annotation-time">00:46 - 01:10</div>
+                <div class="annotation-text">今天我主要想和大家讨论一下第一阶段的完成情况。</div>
+                <div style="font-size: 12px; color: var(--color-primary);">🏷️ 2个标签 | 👤 说话人2</div>
+            </div>
+            <button class="btn" style="width: 100%; margin-top: 10px;">+ 新建标注</button>
+        </div>
+    </div>
+    <div class="back-link">
+        <a href="index.html">← 返回原型索引</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Label Pro - HTML 原型演示</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #059669;
+            --color-primary-light: #10B981;
+            --color-cta: #F97316;
+            --color-background: #ECFDF5;
+            --color-text: #064E3B;
+            --color-neutral-100: #F3F4F6;
+            --color-neutral-200: #E5E7EB;
+            --color-neutral-300: #D1D5DB;
+            --color-neutral-700: #374151;
+            --color-neutral-800: #1F2937;
+            --color-white: #FFFFFF;
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-error: #EF4444;
+
+            --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            --font-serif: 'Open Sans', Georgia, 'Cambria', 'Times New Roman', Times, serif;
+
+            --spacing-4: 16px;
+            --spacing-6: 24px;
+            --spacing-8: 32px;
+            --spacing-12: 48px;
+
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+            --transition: 200ms ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--color-text);
+            background-color: var(--color-background);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-6);
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--color-white);
+            border-bottom: 1px solid var(--color-neutral-200);
+            padding: var(--spacing-6) 0;
+            margin-bottom: var(--spacing-12);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--color-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-white);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: var(--spacing-12) 0;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: var(--spacing-4);
+            color: var(--color-text);
+        }
+
+        .hero-description {
+            font-size: 20px;
+            color: var(--color-neutral-700);
+            margin-bottom: var(--spacing-8);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Prototype Grid */
+        .prototype-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-6);
+            margin-bottom: var(--spacing-12);
+        }
+
+        .prototype-card {
+            background-color: var(--color-white);
+            border: 1px solid var(--color-neutral-200);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-6);
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .prototype-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--color-primary);
+        }
+
+        .prototype-card-core {
+            border-color: var(--color-primary);
+            background: linear-gradient(135deg, var(--color-white) 0%, #ECFDF5 100%);
+        }
+
+        .prototype-icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--color-primary-light);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: var(--spacing-4);
+        }
+
+        .prototype-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-2);
+            color: var(--color-text);
+        }
+
+        .prototype-description {
+            font-size: 14px;
+            color: var(--color-neutral-700);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .prototype-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: var(--color-primary-light);
+            color: var(--color-text);
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--color-white);
+            border-top: 1px solid var(--color-neutral-200);
+            padding: var(--spacing-6) 0;
+            text-align: center;
+            color: var(--color-neutral-700);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 32px;
+            }
+
+            .hero-description {
+                font-size: 16px;
+            }
+
+            .prototype-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo">
+                <div class="logo-icon">🎙️</div>
+                <div class="logo-text">Audio Label Pro</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h1 class="hero-title">HTML 原型演示</h1>
+            <p class="hero-description">
+                Audio Label Pro 是一个专业的语音数据标注平台，支持团队协作、AI辅助标注、长音频处理。
+            </p>
+        </section>
+
+        <section class="prototype-grid">
+            <a href="page-登录页.html" class="prototype-card">
+                <div class="prototype-icon">🔐</div>
+                <h2 class="prototype-title">登录页</h2>
+                <p class="prototype-description">用户登录界面，支持邮箱和密码登录</p>
+                <span class="prototype-badge">P0</span>
+            </a>
+
+            <a href="page-首页.html" class="prototype-card">
+                <div class="prototype-icon">🏠</div>
+                <h2 class="prototype-title">首页</h2>
+                <p class="prototype-description">项目概览、最近任务、快捷操作</p>
+                <span class="prototype-badge">P0</span>
+            </a>
+
+            <a href="page-音频列表.html" class="prototype-card">
+                <div class="prototype-icon">📁</div>
+                <h2 class="prototype-title">音频列表</h2>
+                <p class="prototype-description">音频文件管理、上传、文件夹导航</p>
+                <span class="prototype-badge">P0</span>
+            </a>
+
+            <a href="page-标注界面.html" class="prototype-card prototype-card-core">
+                <div class="prototype-icon">🎯</div>
+                <h2 class="prototype-title">标注界面 ⭐</h2>
+                <p class="prototype-description">核心标注页面，波形显示、标注编辑、AI辅助</p>
+                <span class="prototype-badge">核心页面</span>
+            </a>
+
+            <a href="page-审核界面.html" class="prototype-card">
+                <div class="prototype-icon">✅</div>
+                <h2 class="prototype-title">审核界面</h2>
+                <p class="prototype-description">标注审核界面，质量评分、问题标记</p>
+                <span class="prototype-badge">P1</span>
+            </a>
+
+            <a href="page-任务列表.html" class="prototype-card">
+                <div class="prototype-icon">📋</div>
+                <h2 class="prototype-title">任务列表</h2>
+                <p class="prototype-description">任务管理、分配、进度跟踪</p>
+                <span class="prototype-badge">P1</span>
+            </a>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 Audio Label Pro. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
