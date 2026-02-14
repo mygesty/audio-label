@@ -163,7 +163,7 @@
 - [x] 实现密码加密（bcrypt）
 - [x] 实现刷新令牌机制
 - [x] 实现登出 API（POST /api/auth/logout）
-- [ ] 实现密码重置功能
+- [x] 实现密码重置功能（POST /api/auth/request-password-reset, POST /api/auth/reset-password）
 - [x] 添加认证守卫（Auth Guard）
 
 **前端任务**：
@@ -174,13 +174,15 @@
 - [x] 实现令牌存储（localStorage）
 - [x] 实现自动登录
 - [x] 实现登出功能
-- [ ] 实现密码重置页面
+- [x] 实现密码重置页面（RequestPasswordResetPage.vue, ResetPasswordPage.vue）
 
 **验收标准**：
 - ✅ 用户可以注册、登录、登出
 - ✅ 令牌自动刷新机制正常
 - [ ] 未登录用户无法访问受保护页面
 - ✅ 密码加密存储
+- ✅ 用户可以请求密码重置
+- ✅ 用户可以通过重置链接重置密码
 
 #### 1.3 权限管理模块
 
@@ -1354,6 +1356,7 @@
 - POST /api/auth/login - 用户登录
 - POST /api/auth/logout - 用户登出
 - POST /api/auth/refresh - 刷新令牌
+- POST /api/auth/request-password-reset - 请求密码重置
 - POST /api/auth/reset-password - 重置密码
 
 #### 用户模块

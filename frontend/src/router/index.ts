@@ -20,6 +20,18 @@ const routes: RouteRecordRaw[] = [
     meta: { public: true },
   },
   {
+    path: '/request-password-reset',
+    name: 'RequestPasswordReset',
+    component: () => import('@/pages/RequestPasswordResetPage.vue'),
+    meta: { public: true },
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/pages/ResetPasswordPage.vue'),
+    meta: { public: true },
+  },
+  {
     path: '/audio-list',
     name: 'AudioList',
     component: () => import('@/pages/AudioListPage.vue'),

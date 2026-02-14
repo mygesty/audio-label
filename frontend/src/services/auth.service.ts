@@ -66,6 +66,21 @@ export class AuthService {
   isAuthenticated(): boolean {
     return !!localStorage.getItem('access_token')
   }
+
+  // 请求密码重置
+  async requestPasswordReset(data: { email: string }): Promise<{ message: string }> {
+    const response = await httpService.post<{ message: string }>(
+      '/auth/request-password-reset',
+      data,
+    )
+    return response.data
+  }
+
+  // 重置密码
+  async resetPassword(data: { token: string; password: string }): Promise<{ message: string }> {
+    const response = await httpService.post<{ message: string }>('/auth/reset-password', data)
+    return response.data
+  }
 }
 
 export const authService = new AuthService()

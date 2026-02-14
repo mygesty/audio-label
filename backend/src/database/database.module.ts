@@ -19,7 +19,7 @@ import { Project } from '../projects/entities';
         database: configService.get('DB_DATABASE', 'audio_label'),
         entities: [User, Session, Team, TeamMember, Project],
         synchronize: configService.get('NODE_ENV') === 'development',
-        logging: configService.get('NODE_ENV') === 'development',
+        logging: false,
       }),
     }),
   ],

@@ -9,11 +9,13 @@ import { AuthService } from './services/auth.service';
 import { JwtAuthService } from './services/jwt.service';
 import { PasswordService } from './services/password.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
+    MailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

@@ -1445,13 +1445,13 @@ try {
 #### 1. 认证模块 (`/auth`)
 
 ```
-POST   /api/v1/auth/register          # 用户注册
-POST   /api/v1/auth/login             # 用户登录
-POST   /api/v1/auth/logout            # 用户登出
-POST   /api/v1/auth/refresh           # 刷新 Token
-POST   /api/v1/auth/forgot-password   # 忘记密码
-POST   /api/v1/auth/reset-password    # 重置密码
-GET    /api/v1/auth/verify-email      # 验证邮箱
+POST   /api/v1/auth/register                     # 用户注册
+POST   /api/v1/auth/login                        # 用户登录
+POST   /api/v1/auth/logout                       # 用户登出
+POST   /api/v1/auth/refresh                      # 刷新 Token
+POST   /api/v1/auth/request-password-reset       # 请求密码重置
+POST   /api/v1/auth/reset-password               # 重置密码
+GET    /api/v1/auth/verify-email                 # 验证邮箱
 ```
 
 #### 2. 用户模块 (`/users`)

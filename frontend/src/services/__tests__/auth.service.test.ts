@@ -456,4 +456,151 @@ describe('AuthService', () => {
       expect(result.user.avatarUrl).toBeDefined()
     })
   })
+
+  describe('Password Reset', () => {
+    describe('requestPasswordReset', () => {
+      it('should request password reset successfully', async () => {
+        const mockResponse = {
+          data: {
+            message: 'If the email exists, a password reset link has been sent',
+          },
+        }
+
+        vi.mocked(httpService.post).mockResolvedValue(mockResponse)
+
+        const requestData = {
+          email: 'test@example.com',
+        }
+
+        const result = await authService.requestPasswordReset(requestData)
+
+        expect(httpService.post).toHaveBeenCalledWith('/auth/request-password-reset', requestData)
+        expect(result).toEqual(mockResponse.data)
+      })
+
+      it('should handle password reset request error', async () => {
+        const mockError = new Error('Request failed')
+        vi.mocked(httpService.post).mockRejectedValue(mockError)
+
+        const requestData = {
+          email: 'test@example.com',
+        }
+
+        await expect(authService.requestPasswordReset(requestData)).rejects.toThrow('Request failed')
+      })
+
+      it('should send correct request format', async () => {
+        const mockResponse = {
+          data: {
+            message: 'If the email exists, a password reset link has been sent',
+          },
+        }
+
+        vi.mocked(httpService.post).mockResolvedValue(mockResponse)
+
+        const requestData = {
+          email: 'test@example.com',
+        }
+
+        await authService.requestPasswordReset(requestData)
+
+        const callArgs = vi.mocked(httpService.post).mock.calls[0]
+        expect(callArgs[0]).toBe('/auth/request-password-reset')
+        expect(callArgs[1]).toHaveProperty('email')
+        expect(Object.keys(callArgs[1])).toHaveLength(1)
+      })
+
+      it('should handle valid email format', async () => {
+        const mockResponse = {
+          data: {
+            message: 'If the email exists, a password reset link has been sent',
+          },
+        }
+
+        vi.mocked(httpService.post).mockResolvedValue(mockResponse)
+
+        // Test with valid email format
+        await authService.requestPasswordReset({
+          email: 'valid@example.com',
+        })
+
+        expect(httpService.post).toHaveBeenCalled()
+      })
+    })
+
+    describe('resetPassword', () => {
+      it('should reset password successfully', async () => {
+        const mockResponse = {
+          data: {
+            message: 'Password has been reset successfully',
+          },
+        }
+
+        vi.mocked(httpService.post).mockResolvedValue(mockResponse)
+
+        const requestData = {
+          token: 'mock-reset-token',
+          password: 'NewPassword123',
+        }
+
+        const result = await authService.resetPassword(requestData)
+
+        expect(httpService.post).toHaveBeenCalledWith('/auth/reset-password', requestData)
+        expect(result).toEqual(mockResponse.data)
+      })
+
+      it('should handle password reset error', async () => {
+        const mockError = new Error('Reset failed')
+        vi.mocked(httpService.post).mockRejectedValue(mockError)
+
+        const requestData = {
+          token: 'mock-reset-token',
+          password: 'NewPassword123',
+        }
+
+        await expect(authService.resetPassword(requestData)).rejects.toThrow('Reset failed')
+      })
+
+      it('should send correct request format', async () => {
+        const mockResponse = {
+          data: {
+            message: 'Password has been reset successfully',
+          },
+        }
+
+        vi.mocked(httpService.post).mockResolvedValue(mockResponse)
+
+        const requestData = {
+          token: 'mock-reset-token',
+          password: 'NewPassword123',
+        }
+
+        await authService.resetPassword(requestData)
+
+        const callArgs = vi.mocked(httpService.post).mock.calls[0]
+        expect(callArgs[0]).toBe('/auth/reset-password')
+        expect(callArgs[1]).toHaveProperty('token')
+        expect(callArgs[1]).toHaveProperty('password')
+        expect(Object.keys(callArgs[1])).toHaveLength(2)
+      })
+
+      it('should handle valid password format', async () => {
+        const mockResponse = {
+          data: {
+            message: 'Password has been reset successfully',
+          },
+        }
+
+        vi.mocked(httpService.post).mockResolvedValue(mockResponse)
+
+        // Test with valid password format (6+ characters, contains uppercase, lowercase, and number)
+        await authService.resetPassword({
+          token: 'mock-reset-token',
+          password: 'NewPassword123',
+        })
+
+        expect(httpService.post).toHaveBeenCalled()
+      })
+    })
+  })
 })

@@ -62,4 +62,29 @@ export class JwtAuthService {
 
     return { accessToken, refreshToken };
   }
+
+  async generateResetToken(userId: string): Promise<string> {
+    // Generate a random token using JWT with expiration
+    const token = this.jwtService.sign(
+      { sub: userId, type: 'password_reset' } as any,
+      { expiresIn: '1h' },
+    );
+
+    return token;
+  }
+
+  async verifyResetToken(token: string): Promise<{ userId: string }> {
+    try {
+      const payload = this.jwtService.verify(token);
+
+      // Verify this is a password reset token
+      if (payload.type !== 'password_reset') {
+        throw new UnauthorizedException('Invalid token type');
+      }
+
+      return { userId: payload.sub };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired reset token');
+    }
+  }
 }

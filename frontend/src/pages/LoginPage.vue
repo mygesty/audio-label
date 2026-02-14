@@ -37,6 +37,9 @@
 
         <el-form-item>
           <el-checkbox v-model="loginForm.rememberMe">记住我</el-checkbox>
+          <router-link to="/request-password-reset" style="margin-left: auto; font-size: 14px">
+            忘记密码？
+          </router-link>
         </el-form-item>
 
         <el-form-item>

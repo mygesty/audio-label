@@ -129,6 +129,16 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import {
+  Document,
+  Edit,
+  View,
+  CircleCheck,
+  Upload,
+  Headset,
+  List,
+  Download,
+} from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
