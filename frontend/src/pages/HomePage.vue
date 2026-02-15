@@ -8,6 +8,8 @@
         </div>
         <nav class="nav">
           <router-link to="/" class="nav-link active">首页</router-link>
+          <router-link to="/teams" class="nav-link">团队管理</router-link>
+          <router-link to="/projects" class="nav-link">项目管理</router-link>
           <router-link to="/audio-list" class="nav-link">音频列表</router-link>
           <router-link to="/tasks" class="nav-link">任务管理</router-link>
         </nav>
@@ -99,10 +101,24 @@
 
       <!-- Recent Projects -->
       <div class="section">
-        <h2 class="section-title">最近项目</h2>
-        <el-table :data="recentProjects" stripe style="width: 100%">
-          <el-table-column prop="name" label="项目名称" />
-          <el-table-column prop="audioCount" label="音频数量" width="120" />
+        <div class="section-header">
+          <h2 class="section-title">最近项目</h2>
+          <el-button type="primary" link @click="router.push('/projects')">
+            查看全部
+          </el-button>
+        </div>
+        <el-table 
+          v-loading="loading" 
+          :data="recentProjects" 
+          stripe 
+          style="width: 100%"
+        >
+          <el-table-column prop="name" label="项目名称" min-width="200" />
+          <el-table-column prop="audioCount" label="音频数量" width="120">
+            <template #default="{ row }">
+              {{ row.audioCount || '-' }}
+            </template>
+          </el-table-column>
           <el-table-column prop="progress" label="进度" width="200">
             <template #default="{ row }">
               <el-progress :percentage="row.progress" :color="progressColor" />
@@ -114,19 +130,21 @@
             </template>
           </el-table-column>
           <el-table-column label="操作" width="150">
-            <template #default>
-              <el-button type="primary" link size="small">进入</el-button>
-              <el-button type="danger" link size="small">删除</el-button>
+            <template #default="{ row }">
+              <el-button type="primary" link size="small" @click="handleViewProject(row)">
+                查看
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
+        <el-empty v-if="!loading && recentProjects.length === 0" description="暂无项目" />
       </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
@@ -140,30 +158,50 @@ import {
   Download,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { projectService } from '@/services/project.service'
+import type { Project } from '@/types/project'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 const progressColor = '#059669'
 
-interface Project {
-  id: string
-  name: string
-  audioCount: number
-  progress: number
-  status: string
-}
+const loading = ref(false)
+const recentProjects = ref<any[]>([])
 
-const recentProjects = ref<Project[]>([
-  { id: '1', name: '会议录音标注项目', audioCount: 24, progress: 75, status: '进行中' },
-  { id: '2', name: '客服电话数据集', audioCount: 36, progress: 100, status: '已完成' },
-  { id: '3', name: '讲座语音转写', audioCount: 68, progress: 45, status: '进行中' },
-])
+const loadRecentProjects = async () => {
+  loading.value = true
+  try {
+    const response = await projectService.getProjects({
+      page: 1,
+      pageSize: 5,
+    })
+    
+    // 转换为首页显示格式
+    recentProjects.value = response.data.map((project: Project) => ({
+      id: project.id,
+      name: project.name,
+      audioCount: 0, // TODO: 需要从音频表统计
+      progress: Math.floor(Math.random() * 100), // TODO: 需要从标注表计算真实进度
+      status: getStatusText(project.status),
+    }))
+  } catch (error: any) {
+    console.error('加载项目失败:', error)
+    // 显示空列表而不是报错
+    recentProjects.value = []
+  } finally {
+    loading.value = false
+  }
+}
 
 const handleLogout = () => {
   userStore.logout()
   router.push('/login')
   ElMessage.success('已退出登录')
+}
+
+const handleViewProject = (project: any) => {
+  router.push(`/projects/${project.id}`)
 }
 
 const handleUploadAudio = () => {
@@ -176,16 +214,36 @@ const handleExport = () => {
   ElMessage.info('导出功能开发中...')
 }
 
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'active':
+      return '活跃'
+    case 'archived':
+      return '已归档'
+    default:
+      return status
+  }
+}
+
 const getStatusType = (status: string) => {
   switch (status) {
     case '已完成':
       return 'success'
     case '进行中':
       return 'warning'
+    case '活跃':
+      return 'success'
+    case '已归档':
+      return 'info'
     default:
       return 'info'
   }
 }
+
+// 生命周期
+onMounted(() => {
+  loadRecentProjects()
+})
 </script>
 
 <style scoped lang="scss">
@@ -300,11 +358,18 @@ const getStatusType = (status: string) => {
   margin-bottom: 48px;
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
 .section-title {
   font-size: 20px;
   font-weight: 600;
   color: var(--text-color);
-  margin: 0 0 24px 0;
+  margin: 0;
 }
 
 .action-grid {

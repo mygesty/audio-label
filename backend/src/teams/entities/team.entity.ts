@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { TeamMember } from './team-member.entity';
 
 @Entity('teams')
 export class Team {
@@ -12,12 +13,15 @@ export class Team {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ name: 'owner_id' })
+  @Column({ name: 'owner_id', nullable: false })
   ownerId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { eager: false })
   @JoinColumn({ name: 'owner_id' })
   owner: User;
+
+  @OneToMany(() => TeamMember, (member) => member.team)
+  teamMembers: TeamMember[];
 
   @Column({ type: 'jsonb', default: {} })
   settings: Record<string, any>;

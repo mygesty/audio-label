@@ -89,7 +89,15 @@ class HttpService {
   }
 
   get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
-    return this.client.get<T>(url, config)
+    console.log(`🌐 HTTP GET Request: ${url}`, config?.params || {})
+    return this.client.get<T>(url, config).then(response => {
+      console.log(`✅ HTTP GET Response (${url}):`, response.data)
+      return response
+    }).catch(error => {
+      console.error(`❌ HTTP GET Error (${url}):`, error.message)
+      console.error('Error details:', error.response?.data)
+      throw error
+    })
   }
 
   post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {

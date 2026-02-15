@@ -2,8 +2,8 @@
 
 > **项目名称**: Audio Label Pro  
 > **项目类型**: 专业语音数据标注平台 (SaaS)  
-> **最后更新**: 2026-02-14  
-> **当前状态**: 开发中（部分功能已实现）
+> **最后更新**: 2026-02-15  
+> **当前状态**: 开发中（权限管理模块已完成）
 
 ---
 
@@ -22,6 +22,7 @@
 - **质量控制**: 审核流程、问题标记、质量评分
 - **任务管理**: 任务创建、分配、进度跟踪、统计报表
 - **数据导出**: 支持 JSON、CSV、TXT、SRT、VTT、XML 格式
+- **权限管理**: RBAC 权限控制、团队角色管理、资源级权限控制
 
 ### 设计理念
 
@@ -74,27 +75,67 @@ audio-label/
 │   ├── src/
 │   │   ├── assets/        # 静态资源
 │   │   │   └── styles/    # 样式文件
+│   │   ├── components/    # 公共组件
+│   │   │   ├── ProjectCard.vue
+│   │   │   ├── ProjectMemberList.vue
+│   │   │   └── TeamMemberList.vue
+│   │   ├── directives/    # Vue 指令
+│   │   │   └── permission.ts  # 权限指令
 │   │   ├── pages/         # 页面组件
 │   │   │   ├── HomePage.vue
 │   │   │   ├── LoginPage.vue
 │   │   │   ├── RegisterPage.vue
+│   │   │   ├── RequestPasswordResetPage.vue
+│   │   │   ├── ResetPasswordPage.vue
 │   │   │   ├── AudioListPage.vue
 │   │   │   ├── AnnotationPage.vue
 │   │   │   ├── ReviewPage.vue
-│   │   │   └── TaskListPage.vue
+│   │   │   ├── TaskListPage.vue
+│   │   │   ├── ProjectListPage.vue
+│   │   │   ├── ProjectCreatePage.vue
+│   │   │   ├── ProjectDetailPage.vue
+│   │   │   ├── TeamListPage.vue
+│   │   │   ├── TeamCreatePage.vue
+│   │   │   └── TeamDetailPage.vue
 │   │   ├── router/        # 路由配置
 │   │   ├── services/      # API 服务
+│   │   │   ├── auth.service.ts
+│   │   │   ├── permission.service.ts
+│   │   │   ├── project.service.ts
+│   │   │   ├── team.service.ts
+│   │   │   └── __tests__/  # 服务测试
 │   │   ├── stores/        # Pinia 状态管理
 │   │   └── types/         # TypeScript 类型定义
+│   │       ├── user.ts
+│   │       ├── permission.ts
+│   │       ├── project.ts
+│   │       └── team.ts
 │   ├── package.json
-│   └── vite.config.ts
+│   ├── vite.config.ts
+│   └── vitest.config.ts
 │
 ├── backend/               # NestJS 后端服务
 │   ├── src/
 │   │   ├── auth/          # 认证模块 ✅ 已实现
+│   │   │   ├── decorators/  # 装饰器
+│   │   │   │   ├── public.decorator.ts
+│   │   │   │   ├── resource.decorator.ts
+│   │   │   │   └── roles.decorator.ts
+│   │   │   ├── dto/        # 数据传输对象
+│   │   │   │   └── permission.dto.ts
+│   │   │   ├── guards/     # 守卫
+│   │   │   │   ├── jwt-auth.guard.ts
+│   │   │   │   ├── resource.guard.ts
+│   │   │   │   ├── roles.guard.ts
+│   │   │   │   └── team-role.guard.ts
+│   │   │   ├── services/   # 服务
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.module.ts
+│   │   │   └── permission.controller.ts
 │   │   ├── users/         # 用户模块 ✅ 已实现
 │   │   ├── projects/      # 项目模块 ✅ 已实现
 │   │   ├── teams/         # 团队模块 ✅ 已实现
+│   │   ├── mail/          # 邮件模块 ✅ 已实现
 │   │   ├── audio/         # 音频模块 ⏳ 待实现
 │   │   ├── annotations/   # 标注模块 ⏳ 待实现
 │   │   ├── ai/            # AI 模块 ⏳ 待实现
@@ -103,8 +144,13 @@ audio-label/
 │   │   ├── export/        # 导出模块 ⏳ 待实现
 │   │   ├── notifications/ # 通知模块 ⏳ 待实现
 │   │   ├── database/      # 数据库模块 ✅ 已实现
+│   │   ├── common/        # 公共模块
 │   │   ├── app.module.ts
 │   │   └── main.ts
+│   ├── test/              # 测试文件
+│   │   ├── permissions.e2e-spec.ts
+│   │   ├── projects.e2e-spec.ts
+│   │   └── teams.e2e-spec.ts
 │   ├── package.json
 │   └── .env.example
 │
@@ -131,6 +177,7 @@ audio-label/
 │   ├── technical-specification.md
 │   ├── DEVELOPMENT_PLAN.md
 │   ├── PROJECT_STRUCTURE.md
+│   ├── permission-module-summary.md
 │   ├── component-design/
 │   ├── design-guidelines/
 │   ├── html-prototype/
@@ -167,6 +214,10 @@ audio-label/
 | VueUse | 14.2.1 | 工具库 | 组合式工具函数库 |
 | Day.js | 1.11.19 | 日期处理 | 轻量级日期库 |
 | lru-cache | 11.2.6 | LRU 缓存 | 前端缓存管理 |
+| Vitest | 4.0.18 | 测试框架 | 快速单元测试 |
+| @vitest/ui | 4.0.18 | 测试 UI | 可视化测试界面 |
+| happy-dom | 20.6.1 | DOM 模拟 | 测试环境 DOM |
+| sass | 1.97.3 | CSS 预处理器 | 支持 SCSS/SASS |
 
 ### 后端技术栈
 
@@ -194,6 +245,10 @@ audio-label/
 | @nestjs/platform-socket.io | 11.1.13 | Socket.io 平台 | NestJS Socket.io 集成 |
 | @nestjs/schedule | 6.1.1 | 定时任务 | 定时任务调度 |
 | @nestjs/bull | 11.0.4 | Bull 集成 | NestJS Bull 模块 |
+| @nestjs/swagger | 11.2.6 | API 文档 | Swagger/OpenAPI 文档 |
+| @nestjs-modules/mailer | 2.0.2 | 邮件模块 | 邮件发送 |
+| nodemailer | 8.0.1 | 邮件客户端 | Node.js 邮件客户端 |
+| @nestjs/config | 4.0.3 | 配置管理 | 环境配置管理 |
 
 ### AI 服务技术栈
 
@@ -269,6 +324,134 @@ audio-label/
 - ❌ 缺乏反馈
 - ❌ 低对比度
 - ❌ 过度装饰
+
+---
+
+## 🔐 权限管理模块
+
+### 概述
+
+权限管理模块实现了基于角色的访问控制（RBAC）和资源级权限控制，支持四种用户角色和层级权限验证。
+
+### 用户角色
+
+| 角色 | 英文标识 | 权限范围 |
+|------|---------|---------|
+| 标注员 | ANNOTATOR | 标注音频、查看自己的任务、提交审核 |
+| 审核员 | REVIEWER | 审核标注、查看所有任务、查看团队统计 |
+| 项目管理员 | PROJECT_ADMIN | 管理项目、分配任务、管理项目成员 |
+| 系统管理员 | SYSTEM_ADMIN | 所有权限，包括系统设置和用户管理 |
+
+### 团队角色
+
+| 角色 | 英文标识 | 权限范围 |
+|------|---------|---------|
+| 管理员 | ADMIN | 管理团队成员、团队设置 |
+| 成员 | MEMBER | 参与团队项目、查看团队信息 |
+
+### 资源类型
+
+- `PROJECT` - 项目
+- `TEAM` - 团队
+- `TASK` - 任务
+- `AUDIO` - 音频
+- `ANNOTATION` - 标注
+
+### 资源操作
+
+- `READ` - 读取
+- `CREATE` - 创建
+- `UPDATE` - 更新
+- `DELETE` - 删除
+- `MANAGE` - 管理
+
+### 后端实现
+
+#### 权限守卫
+
+- **ResourceGuard** (`backend/src/auth/guards/resource.guard.ts`): 资源访问控制守卫，支持资源级权限验证
+- **TeamRoleGuard** (`backend/src/auth/guards/team-role.guard.ts`): 团队角色守卫，验证团队成员角色
+- **JwtAuthGuard** (`backend/src/auth/guards/jwt-auth.guard.ts`): JWT 认证守卫
+- **RolesGuard** (`backend/src/auth/guards/roles.guard.ts`): 角色守卫
+
+#### 权限装饰器
+
+- **@Resource()** (`backend/src/auth/decorators/resource.decorator.ts`): 指定路由需要检查资源访问权限
+- **@ResourceAction()**: 指定路由的资源操作类型
+- **@TeamRoles()**: 指定路由需要的团队角色
+- **@Roles()**: 指定路由需要的用户角色
+- **@Public()**: 标记公开路由
+
+#### 权限 API
+
+- `POST /api/auth/permissions/check`: 检查用户权限
+- `POST /api/auth/permissions/batch-check`: 批量检查权限
+- `GET /api/auth/permissions/user`: 获取当前用户权限信息
+- `GET /api/auth/permissions/roles`: 获取角色权限描述（仅系统管理员）
+
+### 前端实现
+
+#### 权限指令
+
+- **v-permission**: 基于角色控制元素显示
+- **v-role**: 角色权限指令
+- **v-can**: 功能权限指令
+- **v-resource**: 资源权限指令
+
+#### 权限服务
+
+- `PermissionService.checkPermission()`: 检查用户权限
+- `PermissionService.batchCheckPermission()`: 批量检查权限
+- `PermissionService.getUserPermissions()`: 获取当前用户权限信息
+- `PermissionService.getRolePermissions()`: 获取角色权限描述
+- `PermissionService.canReview()`: 检查是否可以审核
+- `PermissionService.canAssignTasks()`: 检查是否可以分配任务
+- `PermissionService.canManageProjects()`: 检查是否可以管理项目
+- `PermissionService.canManageTeam()`: 检查是否可以管理团队
+- `PermissionService.canManageUsers()`: 检查是否可以管理用户
+- `PermissionService.canManageSystem()`: 检查是否可以管理系统
+
+### 使用示例
+
+#### 后端使用
+
+```typescript
+@Controller('projects')
+export class ProjectsController {
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, ResourceGuard)
+  @Resource(ResourceType.PROJECT)
+  @ResourceAction(ResourceAction.UPDATE)
+  async updateProject(@Param('id') id: string, @Body() updateDto: UpdateProjectDto) {
+    // ...
+  }
+}
+```
+
+#### 前端使用
+
+```vue
+<template>
+  <!-- 仅审核员可见 -->
+  <button v-permission="'reviewer'">审核按钮</button>
+
+  <!-- 功能权限 -->
+  <button v-can="'review'">审核</button>
+
+  <!-- 资源权限 -->
+  <button v-resource="{ type: 'project', action: 'delete' }">删除项目</button>
+</template>
+```
+
+### 测试覆盖
+
+- ✅ 后端 E2E 测试 (`backend/test/permissions.e2e-spec.ts`)
+- ✅ 前端单元测试 (`frontend/src/services/__tests__/permission.service.test.ts`)
+- ✅ 权限检查 API 测试
+- ✅ 角色权限验证测试
+- ✅ 资源访问控制测试
+
+详细文档请参考: [permission-module-summary.md](./docs/permission-module-summary.md)
 
 ---
 
@@ -384,7 +567,10 @@ audio-label/
 {
   "dev": "vite",
   "build": "tsc && vite build",
-  "preview": "vite preview"
+  "preview": "vite preview",
+  "test": "vitest",
+  "test:ui": "vitest --ui",
+  "test:coverage": "vitest --coverage"
 }
 ```
 
@@ -441,6 +627,14 @@ npm run test
 # 前端测试
 cd frontend
 npm run test
+
+# 前端测试 UI
+cd frontend
+npm run test:ui
+
+# 前端测试覆盖率
+cd frontend
+npm run test:coverage
 
 # E2E 测试
 cd backend
@@ -519,6 +713,13 @@ MINIO_BUCKET=audio-label
 
 # AI Service
 AI_SERVICE_URL=http://localhost:8000
+
+# Mail (可选)
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USER=your-email@gmail.com
+MAIL_PASSWORD=your-password
+MAIL_FROM=noreply@audiolabel.com
 ```
 
 ### AI 服务环境变量 (.env)
@@ -615,6 +816,7 @@ server: {
 - 使用 DTO 进行数据验证
 - 使用 `class-validator` 和 `class-transformer`
 - 使用异常过滤器处理错误
+- 使用 `@ApiTags()` 和 `@ApiOperation()` 添加 Swagger 文档
 
 ### Python 规范
 
@@ -641,6 +843,7 @@ server: {
 feat(auth): add JWT authentication
 fix(audio): resolve audio player loading issue
 docs(readme): update installation instructions
+feat(permissions): add resource-level permission control
 ```
 
 ---
@@ -665,6 +868,14 @@ docs(readme): update installation instructions
 # 前端测试
 cd frontend
 npm run test
+
+# 前端测试 UI
+cd frontend
+npm run test:ui
+
+# 前端测试覆盖率
+cd frontend
+npm run test:coverage
 
 # 后端测试
 cd backend
@@ -714,6 +925,8 @@ npm run test:e2e
 - 使用 JWT 进行无状态认证
 - 使用 Passport 集成多种认证策略
 - 使用 RBAC 进行权限控制
+- 使用资源级权限控制
+- 使用团队角色验证
 - 使用 bcrypt 加密密码
 
 ### 数据安全
@@ -728,6 +941,7 @@ npm run test:e2e
 - 使用速率限制防止滥用
 - 使用 CORS 策略限制访问
 - 使用 API Key 管理第三方访问
+- 使用 Swagger 文档进行 API 管理
 
 ---
 
@@ -754,6 +968,8 @@ docker-compose logs -f
 4. 设置 CORS 白名单
 5. 使用强 JWT 密钥
 6. 配置 Nginx 反向代理
+7. 配置邮件服务
+8. 启用 API 文档
 
 ---
 
@@ -768,6 +984,7 @@ docker-compose logs -f
 - [设计系统](./docs/design-system.md) - 设计规范
 - [项目结构](./docs/PROJECT_STRUCTURE.md) - 目录结构说明
 - [开发计划](./docs/DEVELOPMENT_PLAN.md) - 开发规划
+- [权限模块总结](./docs/permission-module-summary.md) - 权限管理模块文档
 
 ### 设计文档
 
@@ -847,6 +1064,13 @@ npm run migration:generate -- --name=YourMigration
 npm run migration:run
 ```
 
+**Q: 如何使用权限系统？**
+
+A: 
+1. 后端：使用 `@UseGuards(JwtAuthGuard, ResourceGuard)` 和装饰器
+2. 前端：使用权限指令（`v-permission`, `v-can`, `v-resource`）
+3. 详见 [权限模块总结](./docs/permission-module-summary.md)
+
 ---
 
 ## 🎯 AI Agent 使用指南
@@ -858,20 +1082,24 @@ npm run migration:run
 1. **项目类型**: SaaS 平台，面向企业用户
 2. **技术栈**: Vue 3 + NestJS + FastAPI
 3. **设计风格**: Minimalism & Swiss Style
-4. **核心功能**: 音频标注、AI 辅助、实时协作
-5. **用户类型**: 标注员、审核员、管理员
+4. **核心功能**: 音频标注、AI 辅助、实时协作、权限管理
+5. **用户类型**: 标注员、审核员、项目管理员、系统管理员
 6. **运行环境**: Windows (PowerShell)
 7. **工作区**: 使用 npm workspaces 管理 frontend 和 backend
 8. **端口配置**: Redis 使用 6380 端口（非默认 6379）
+9. **权限系统**: 已实现完整的 RBAC 和资源级权限控制
+10. **邮件服务**: 已集成邮件发送功能
 
 ### 当前实现状态
 
 #### 后端模块（已实现 ✅）
-- `auth` - 认证模块（JWT、登录、注册）
+- `auth` - 认证模块（JWT、登录、注册、权限管理、密码重置）
 - `users` - 用户模块（用户管理、个人资料）
 - `projects` - 项目模块（项目管理）
 - `teams` - 团队模块（团队管理、成员管理）
+- `mail` - 邮件模块（邮件发送）
 - `database` - 数据库模块（TypeORM 配置）
+- `common` - 公共模块（异常过滤器等）
 
 #### 后端模块（待实现 ⏳）
 - `audio` - 音频模块（上传、下载、预览）
@@ -886,13 +1114,28 @@ npm run migration:run
 - `HomePage` - 首页
 - `LoginPage` - 登录页
 - `RegisterPage` - 注册页
+- `RequestPasswordResetPage` - 请求密码重置页
+- `ResetPasswordPage` - 重置密码页
 - `AudioListPage` - 音频列表页
 - `AnnotationPage` - 标注界面
 - `ReviewPage` - 审核界面
 - `TaskListPage` - 任务列表页
+- `ProjectListPage` - 项目列表页
+- `ProjectCreatePage` - 项目创建页
+- `ProjectDetailPage` - 项目详情页
+- `TeamListPage` - 团队列表页
+- `TeamCreatePage` - 团队创建页
+- `TeamDetailPage` - 团队详情页
+
+#### 前端组件（已实现 ✅）
+- `ProjectCard` - 项目卡片组件
+- `ProjectMemberList` - 项目成员列表组件
+- `TeamMemberList` - 团队成员列表组件
+
+#### 前端指令（已实现 ✅）
+- `permission` - 权限指令（v-permission, v-can, v-resource）
 
 #### 前端目录结构（待完善 ⏳）
-- `components` - 公共组件
 - `composables` - 组合式函数
 - `layouts` - 布局组件
 - `utils` - 工具函数
@@ -904,6 +1147,8 @@ npm run migration:run
 3. **使用类型**: TypeScript 和 Python 都要使用类型注解
 4. **添加测试**: 新功能必须包含测试
 5. **更新文档**: 重要变更需要更新文档
+6. **使用权限系统**: 新功能需要集成权限控制
+7. **添加 API 文档**: 使用 Swagger 装饰器添加 API 文档
 
 ### 决策原则
 
@@ -912,6 +1157,7 @@ npm run migration:run
 3. **可维护性**: 代码要易于理解和维护
 4. **可扩展性**: 考虑未来功能扩展
 5. **安全性**: 始终考虑安全性问题
+6. **权限控制**: 所有资源访问都需要权限验证
 
 ### 禁止事项
 
@@ -921,6 +1167,8 @@ npm run migration:run
 - ❌ 不要忽略测试
 - ❌ 不要过度设计
 - ❌ 不要复制粘贴代码而不理解
+- ❌ 不要绕过权限控制
+- ❌ 不要直接访问数据库（使用 ORM）
 
 ### 推荐工具
 
@@ -928,6 +1176,7 @@ npm run migration:run
 - **文件操作**: 使用 `read_file`、`write_file`、`replace`
 - **命令执行**: 使用 `run_shell_command`（PowerShell）
 - **项目管理**: 使用 `todo_write` 和 `todo_read`
+- **API 文档**: 使用 Swagger UI (`http://localhost:3000/api`)
 
 ### 开发优先级
 
@@ -937,16 +1186,19 @@ npm run migration:run
    - 完成认证和用户管理功能
    - 实现音频上传和管理
    - 实现基础标注功能
+   - 集成权限系统到所有模块
 
 2. **中优先级**
    - 实现 AI 辅助功能
    - 实现任务管理
    - 实现协作功能
+   - 完善邮件通知
 
 3. **低优先级**
    - 实现导出功能
    - 实现通知系统
    - 优化性能和用户体验
+   - 添加高级分析功能
 
 ---
 
@@ -965,5 +1217,5 @@ MIT License
 
 ---
 
-**最后更新**: 2026-02-14  
-**文档版本**: v1.2.0
+**最后更新**: 2026-02-15  
+**文档版本**: v1.3.0

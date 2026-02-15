@@ -32,6 +32,42 @@ const routes: RouteRecordRaw[] = [
     meta: { public: true },
   },
   {
+    path: '/teams',
+    name: 'Teams',
+    component: () => import('@/pages/TeamListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/teams/create',
+    name: 'TeamCreate',
+    component: () => import('@/pages/TeamCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/teams/:id',
+    name: 'TeamDetail',
+    component: () => import('@/pages/TeamDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/projects',
+    name: 'Projects',
+    component: () => import('@/pages/ProjectListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/projects/create',
+    name: 'ProjectCreate',
+    component: () => import('@/pages/ProjectCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/projects/:id',
+    name: 'ProjectDetail',
+    component: () => import('@/pages/ProjectDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/audio-list',
     name: 'AudioList',
     component: () => import('@/pages/AudioListPage.vue'),
@@ -62,10 +98,12 @@ const router = createRouter({
   routes,
 })
 
+import { useUserStore } from '@/stores/user'
+
 // Navigation guard for authentication
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach((to, _from, next) => {
   // 初始化 userStore
-  const userStore = (await import('@/stores/user')).useUserStore()
+  const userStore = useUserStore()
   userStore.initFromStorage()
 
   const isPublic = to.meta.public === true

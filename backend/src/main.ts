@@ -17,6 +17,8 @@ async function bootstrap() {
   app.enableCors({
     origin: true, // 允许所有来源（开发环境）
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Enable validation pipes
