@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { TeamsModule } from './teams/teams.module';
 import { ProjectsModule } from './projects/projects.module';
 import { UsersModule } from './users/users.module';
+import { AudioModule } from './audio/audio.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UsersModule } from './users/users.module';
     TeamsModule,
     ProjectsModule,
     UsersModule,
+    AudioModule,
   ],
   controllers: [AppController],
   providers: [AppService],

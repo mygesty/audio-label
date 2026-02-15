@@ -13,6 +13,17 @@ async function bootstrap() {
     },
   );
 
+  // Register multipart plugin for file uploads
+  app.register(await import('@fastify/multipart'), {
+    limits: {
+      fileSize: 500 * 1024 * 1024, // 500MB
+      fieldNameSize: 100,
+      fieldSize: 100,
+      fields: 10,
+    },
+    attachFieldsToBody: true,
+  } as any);
+
   // Enable CORS
   app.enableCors({
     origin: true, // 允许所有来源（开发环境）
