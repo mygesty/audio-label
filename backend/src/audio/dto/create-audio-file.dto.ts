@@ -7,7 +7,11 @@ export class CreateAudioFileDto {
 
   @IsNotEmpty()
   @IsString()
-  filePath: string;
+  storagePath: string;
+
+  @IsOptional()
+  @IsString()
+  storageKey?: string;
 
   @IsNotEmpty()
   @IsNumber()
@@ -32,9 +36,6 @@ export class CreateAudioFileDto {
   @IsOptional()
   @IsNumber()
   bitRate?: number;
-
-  @IsOptional()
-  folderId?: string;
 
   @IsOptional()
   metadata?: Record<string, any>;

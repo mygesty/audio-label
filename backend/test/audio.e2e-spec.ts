@@ -608,4 +608,303 @@ describe('Audio API (e2e)', () => {
       expect(listRes.body.find((f: any) => f.id === folderId)).toBeUndefined();
     });
   });
+
+  // ============ 音频流式传输和下载测试 ============
+
+  describe('GET /audio/:id/stream', () => {
+    let testAudioFileId: string;
+
+    beforeAll(async () => {
+      // 创建一个测试音频文件记录
+      const fs = require('fs');
+      const path = require('path');
+      const crypto = require('crypto');
+
+      // 创建一个小的测试音频文件
+      const uploadDir = path.join(process.cwd(), 'uploads', 'audio');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const randomName = crypto.randomBytes(16).toString('hex');
+      const storageKey = `${randomName}.mp3`;
+      const filePath = path.join(uploadDir, storageKey);
+
+      // 创建一个简单的 MP3 文件（实际上这不是一个有效的 MP3，只是为了测试文件存在）
+      // 在实际测试中，应该使用真实的音频文件
+      const dummyData = Buffer.from('dummy audio data');
+      fs.writeFileSync(filePath, dummyData);
+
+      // 创建音频文件记录
+      const createRes = await request(app.getHttpServer())
+        .post('/audio')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          projectId: testProjectId,
+          name: 'Test Audio File.mp3',
+          storagePath: '',
+          storageKey: storageKey,
+          fileSize: dummyData.length,
+          fileType: 'audio/mpeg',
+          status: 'ready',
+        });
+
+      testAudioFileId = createRes.body.id;
+    });
+
+    it('should stream audio file successfully', () => {
+      return request(app.getHttpServer())
+        .get(`/audio/${testAudioFileId}/stream`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .expect('Content-Type', /audio/);
+    });
+
+    it('should support range requests', () => {
+      return request(app.getHttpServer())
+        .get(`/audio/${testAudioFileId}/stream`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Range', 'bytes=0-1023')
+        .expect(206)
+        .expect('Content-Range', /bytes 0-1023/)
+        .expect('Accept-Ranges', 'bytes');
+    });
+
+    it('should return 416 for invalid range', () => {
+      return request(app.getHttpServer())
+        .get(`/audio/${testAudioFileId}/stream`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Range', 'bytes=999999-9999999')
+        .expect(416)
+        .expect('Content-Range', /bytes \*\//);
+    });
+
+    it('should fail without authentication', () => {
+      return request(app.getHttpServer())
+        .get(`/audio/${testAudioFileId}/stream`)
+        .expect(401);
+    });
+
+    it('should fail with non-existent audio file ID', () => {
+      return request(app.getHttpServer())
+        .get('/audio/non-existent-id/stream')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404);
+    });
+
+    it('should fail when audio file is not ready', async () => {
+      // 创建一个未就绪的音频文件
+      const createRes = await request(app.getHttpServer())
+        .post('/audio')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          projectId: testProjectId,
+          name: 'Uploading Audio.mp3',
+          storagePath: '',
+          storageKey: 'non-existent-file.mp3',
+          fileSize: 1000,
+          fileType: 'audio/mpeg',
+          status: 'uploading',
+        });
+
+      return request(app.getHttpServer())
+        .get(`/audio/${createRes.body.id}/stream`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(400);
+    });
+
+    it('should fail when audio file does not exist on disk', async () => {
+      // 创建一个文件记录但文件不存在
+      const createRes = await request(app.getHttpServer())
+        .post('/audio')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          projectId: testProjectId,
+          name: 'Missing File.mp3',
+          storagePath: '',
+          storageKey: 'non-existent-file-12345.mp3',
+          fileSize: 1000,
+          fileType: 'audio/mpeg',
+          status: 'ready',
+        });
+
+      return request(app.getHttpServer())
+        .get(`/audio/${createRes.body.id}/stream`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404);
+    });
+  });
+
+  describe('GET /audio/:id/download', () => {
+    let testAudioFileId: string;
+
+    beforeAll(async () => {
+      // 创建一个测试音频文件记录（复用上面的逻辑）
+      const fs = require('fs');
+      const path = require('path');
+      const crypto = require('crypto');
+
+      const uploadDir = path.join(process.cwd(), 'uploads', 'audio');
+      const randomName = crypto.randomBytes(16).toString('hex');
+      const storageKey = `${randomName}.mp3`;
+      const filePath = path.join(uploadDir, storageKey);
+
+      const dummyData = Buffer.from('dummy audio data for download');
+      fs.writeFileSync(filePath, dummyData);
+
+      const createRes = await request(app.getHttpServer())
+        .post('/audio')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          projectId: testProjectId,
+          name: 'Test Download Audio.mp3',
+          storagePath: '',
+          storageKey: storageKey,
+          fileSize: dummyData.length,
+          fileType: 'audio/mpeg',
+          status: 'ready',
+        });
+
+      testAudioFileId = createRes.body.id;
+    });
+
+    it('should download audio file successfully', () => {
+      return request(app.getHttpServer())
+        .get(`/audio/${testAudioFileId}/download`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .expect('Content-Disposition', /attachment/)
+        .expect('Content-Type', /audio/);
+    });
+
+    it('should include correct filename in Content-Disposition header', () => {
+      return request(app.getHttpServer())
+        .get(`/audio/${testAudioFileId}/download`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .expect('Content-Disposition', /Test Download Audio.mp3/);
+    });
+
+    it('should fail without authentication', () => {
+      return request(app.getHttpServer())
+        .get(`/audio/${testAudioFileId}/download`)
+        .expect(401);
+    });
+
+    it('should fail with non-existent audio file ID', () => {
+      return request(app.getHttpServer())
+        .get('/audio/non-existent-id/download')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404);
+    });
+  });
+
+  // ============ 流式传输和下载的边界情况测试 ============
+
+  describe('Stream and Download Edge Cases', () => {
+    it('should handle zero-byte range requests correctly', async () => {
+      // 创建一个小的测试文件
+      const fs = require('fs');
+      const path = require('path');
+      const crypto = require('crypto');
+
+      const uploadDir = path.join(process.cwd(), 'uploads', 'audio');
+      const randomName = crypto.randomBytes(16).toString('hex');
+      const storageKey = `${randomName}.mp3`;
+      const filePath = path.join(uploadDir, storageKey);
+
+      const dummyData = Buffer.from('small');
+      fs.writeFileSync(filePath, dummyData);
+
+      const createRes = await request(app.getHttpServer())
+        .post('/audio')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          projectId: testProjectId,
+          name: 'Small Audio.mp3',
+          storagePath: '',
+          storageKey: storageKey,
+          fileSize: dummyData.length,
+          fileType: 'audio/mpeg',
+          status: 'ready',
+        });
+
+      return request(app.getHttpServer())
+        .get(`/audio/${createRes.body.id}/stream`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Range', 'bytes=0-0')
+        .expect(206);
+    });
+
+    it('should handle range request for entire file', async () => {
+      const fs = require('fs');
+      const path = require('path');
+      const crypto = require('crypto');
+
+      const uploadDir = path.join(process.cwd(), 'uploads', 'audio');
+      const randomName = crypto.randomBytes(16).toString('hex');
+      const storageKey = `${randomName}.mp3`;
+      const filePath = path.join(uploadDir, storageKey);
+
+      const dummyData = Buffer.from('test audio data');
+      const fileSize = dummyData.length;
+      fs.writeFileSync(filePath, dummyData);
+
+      const createRes = await request(app.getHttpServer())
+        .post('/audio')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          projectId: testProjectId,
+          name: 'Full Range Audio.mp3',
+          storagePath: '',
+          storageKey: storageKey,
+          fileSize: fileSize,
+          fileType: 'audio/mpeg',
+          status: 'ready',
+        });
+
+      return request(app.getHttpServer())
+        .get(`/audio/${createRes.body.id}/stream`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Range', `bytes=0-${fileSize - 1}`)
+        .expect(206)
+        .expect('Content-Range', `bytes 0-${fileSize - 1}/${fileSize}`);
+    });
+
+    it('should return correct Content-Length for range requests', async () => {
+      const fs = require('fs');
+      const path = require('path');
+      const crypto = require('crypto');
+
+      const uploadDir = path.join(process.cwd(), 'uploads', 'audio');
+      const randomName = crypto.randomBytes(16).toString('hex');
+      const storageKey = `${randomName}.mp3`;
+      const filePath = path.join(uploadDir, storageKey);
+
+      const dummyData = Buffer.from('audio content for testing');
+      fs.writeFileSync(filePath, dummyData);
+
+      const createRes = await request(app.getHttpServer())
+        .post('/audio')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          projectId: testProjectId,
+          name: 'Content Length Test.mp3',
+          storagePath: '',
+          storageKey: storageKey,
+          fileSize: dummyData.length,
+          fileType: 'audio/mpeg',
+          status: 'ready',
+        });
+
+      return request(app.getHttpServer())
+        .get(`/audio/${createRes.body.id}/stream`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Range', 'bytes=5-14')
+        .expect(206)
+        .expect((res) => {
+          expect(res.header['content-length']).toBe('10');
+        });
+    });
+  });
 });

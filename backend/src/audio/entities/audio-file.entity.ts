@@ -1,7 +1,6 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Project } from '../../projects/entities/project.entity';
-import { AudioFolder } from './audio-folder.entity';
 
 export enum AudioStatus {
   UPLOADING = 'uploading',
@@ -22,18 +21,14 @@ export class AudioFile {
   @JoinColumn({ name: 'project_id' })
   project: Project;
 
-  @Column({ name: 'folder_id', nullable: true })
-  folderId: string | null;
-
-  @ManyToOne(() => AudioFolder, { onDelete: 'SET NULL', nullable: true })
-  @JoinColumn({ name: 'folder_id' })
-  folder: AudioFolder | null;
-
-  @Column({ length: 500 })
+  @Column({ length: 255 })
   name: string;
 
-  @Column({ name: 'file_path', length: 500 })
-  filePath: string;
+  @Column({ name: 'storage_path', length: 1000 })
+  storagePath: string;
+
+  @Column({ name: 'storage_key', length: 255, nullable: true })
+  storageKey: string | null;
 
   @Column({ name: 'file_size' })
   fileSize: number;
@@ -41,7 +36,7 @@ export class AudioFile {
   @Column({ name: 'file_type', length: 50 })
   fileType: string;
 
-  @Column({ name: 'duration', nullable: true })
+  @Column({ name: 'duration', type: 'decimal', precision: 10, scale: 2, nullable: true })
   duration: number | null;
 
   @Column({ name: 'sample_rate', nullable: true })

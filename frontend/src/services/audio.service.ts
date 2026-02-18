@@ -1,9 +1,6 @@
 import http from './http';
 import type {
   AudioFile,
-  AudioFolder,
-  CreateAudioFolderDto,
-  UpdateAudioFolderDto,
   CreateAudioFileDto,
   UpdateAudioFileDto,
   QueryAudioFileDto,
@@ -18,61 +15,6 @@ import type {
 class AudioService {
   private readonly basePath = '/audio';
 
-  // ============ 文件夹管理 ============
-
-  /**
-   * 创建文件夹
-   */
-  async createFolder(data: CreateAudioFolderDto): Promise<AudioFolder> {
-    const response = await http.post<AudioFolder>(
-      `${this.basePath}/folders`,
-      data,
-    );
-    return response.data;
-  }
-
-  /**
-   * 获取文件夹列表
-   */
-  async getFolders(projectId: string): Promise<AudioFolder[]> {
-    const response = await http.get<AudioFolder[]>(
-      `${this.basePath}/folders`,
-      { params: { projectId } },
-    );
-    return response.data;
-  }
-
-  /**
-   * 获取文件夹详情
-   */
-  async getFolderById(id: string): Promise<AudioFolder> {
-    const response = await http.get<AudioFolder>(
-      `${this.basePath}/folders/${id}`,
-    );
-    return response.data;
-  }
-
-  /**
-   * 更新文件夹
-   */
-  async updateFolder(
-    id: string,
-    data: UpdateAudioFolderDto,
-  ): Promise<AudioFolder> {
-    const response = await http.patch<AudioFolder>(
-      `${this.basePath}/folders/${id}`,
-      data,
-    );
-    return response.data;
-  }
-
-  /**
-   * 删除文件夹
-   */
-  async deleteFolder(id: string): Promise<void> {
-    await http.delete(`${this.basePath}/folders/${id}`);
-  }
-
   // ============ 音频文件管理 ============
 
   /**
@@ -81,14 +23,14 @@ class AudioService {
   async uploadFile(
     file: File,
     projectId: string,
-    folderId?: string,
+    storagePath?: string,
     onUploadProgress?: (progress: number) => void,
   ): Promise<UploadAudioResponse> {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('projectId', projectId);
-    if (folderId) {
-      formData.append('folderId', folderId);
+    if (storagePath) {
+      formData.append('storagePath', storagePath);
     }
 
     const response = await http.post<UploadAudioResponse>(
@@ -174,16 +116,6 @@ class AudioService {
   async countByProject(projectId: string): Promise<AudioStatsResponse> {
     const response = await http.get<AudioStatsResponse>(
       `${this.basePath}/stats/project/${projectId}`,
-    );
-    return response.data;
-  }
-
-  /**
-   * 统计文件夹音频文件数量
-   */
-  async countByFolder(folderId: string): Promise<AudioStatsResponse> {
-    const response = await http.get<AudioStatsResponse>(
-      `${this.basePath}/stats/folder/${folderId}`,
     );
     return response.data;
   }

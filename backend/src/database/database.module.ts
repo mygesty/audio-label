@@ -4,7 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User, Session } from '../users/entities';
 import { Team, TeamMember } from '../teams/entities';
 import { Project } from '../projects/entities';
-import { AudioFile, AudioFolder } from '../audio/entities';
+import { AudioFile } from '../audio/entities';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { AudioFile, AudioFolder } from '../audio/entities';
         username: configService.get('DB_USERNAME', 'postgres'),
         password: configService.get('DB_PASSWORD', 'postgres'),
         database: configService.get('DB_DATABASE', 'audio_label'),
-        entities: [User, Session, Team, TeamMember, Project, AudioFile, AudioFolder],
+        entities: [User, Session, Team, TeamMember, Project, AudioFile],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: false,
       }),

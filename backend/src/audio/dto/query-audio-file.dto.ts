@@ -9,10 +9,6 @@ export class QueryAudioFileDto {
 
   @IsOptional()
   @IsString()
-  folderId?: string;
-
-  @IsOptional()
-  @IsString()
   name?: string;
 
   @IsOptional()

@@ -4,9 +4,6 @@ import audioService from '../audio.service';
 import { AudioStatus } from '../../types/audio';
 import type {
   AudioFile,
-  AudioFolder,
-  CreateAudioFolderDto,
-  UpdateAudioFolderDto,
   UpdateAudioFileDto,
   QueryAudioFileDto,
   AudioFileListResponse,
@@ -31,186 +28,14 @@ describe('AudioService', () => {
     vi.clearAllMocks();
   });
 
-  describe('Folder Management', () => {
-    describe('createFolder', () => {
-      it('should create a folder successfully', async () => {
-        const mockFolder: AudioFolder = {
-          id: 'folder-1',
-          projectId: 'project-1',
-          name: 'Test Folder',
-          description: 'Test description',
-          parentId: null,
-          createdBy: 'user-1',
-          sortOrder: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          deletedAt: null,
-        };
-
-        mockedHttp.post.mockResolvedValue({ data: mockFolder });
-
-        const dto: CreateAudioFolderDto = {
-          name: 'Test Folder',
-          description: 'Test description',
-          projectId: 'project-1',
-        };
-
-        const result = await audioService.createFolder(dto);
-
-        expect(result).toEqual(mockFolder);
-        expect(mockedHttp.post).toHaveBeenCalledWith('/api/audio/folders', dto);
-        expect(mockedHttp.post).toHaveBeenCalledTimes(1);
-      });
-
-      it('should handle errors when creating a folder', async () => {
-        const error = new Error('Failed to create folder');
-        mockedHttp.post.mockRejectedValue(error);
-
-        const dto: CreateAudioFolderDto = {
-          name: 'Test Folder',
-          projectId: 'project-1',
-        };
-
-        await expect(audioService.createFolder(dto)).rejects.toThrow(error);
-      });
-    });
-
-    describe('getFolders', () => {
-      it('should get folders for a project', async () => {
-        const mockFolders: AudioFolder[] = [
-          {
-            id: 'folder-1',
-            projectId: 'project-1',
-            name: 'Folder 1',
-            description: null,
-            parentId: null,
-            createdBy: 'user-1',
-            sortOrder: 0,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            deletedAt: null,
-          },
-        ];
-
-        mockedHttp.get.mockResolvedValue({ data: mockFolders });
-
-        const result = await audioService.getFolders('project-1');
-
-        expect(result).toEqual(mockFolders);
-        expect(mockedHttp.get).toHaveBeenCalledWith('/api/audio/folders', {
-          params: { projectId: 'project-1' },
-        });
-      });
-
-      it('should handle errors when getting folders', async () => {
-        const error = new Error('Failed to get folders');
-        mockedHttp.get.mockRejectedValue(error);
-
-        await expect(audioService.getFolders('project-1')).rejects.toThrow(error);
-      });
-    });
-
-    describe('getFolderById', () => {
-      it('should get a folder by ID', async () => {
-        const mockFolder: AudioFolder = {
-          id: 'folder-1',
-          projectId: 'project-1',
-          name: 'Test Folder',
-          description: null,
-          parentId: null,
-          createdBy: 'user-1',
-          sortOrder: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          deletedAt: null,
-        };
-
-        mockedHttp.get.mockResolvedValue({ data: mockFolder });
-
-        const result = await audioService.getFolderById('folder-1');
-
-        expect(result).toEqual(mockFolder);
-        expect(mockedHttp.get).toHaveBeenCalledWith('/api/audio/folders/folder-1');
-      });
-
-      it('should handle errors when getting a folder', async () => {
-        const error = new Error('Folder not found');
-        mockedHttp.get.mockRejectedValue(error);
-
-        await expect(audioService.getFolderById('folder-1')).rejects.toThrow(error);
-      });
-    });
-
-    describe('updateFolder', () => {
-      it('should update a folder successfully', async () => {
-        const mockFolder: AudioFolder = {
-          id: 'folder-1',
-          projectId: 'project-1',
-          name: 'Updated Folder',
-          description: 'Updated description',
-          parentId: null,
-          createdBy: 'user-1',
-          sortOrder: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          deletedAt: null,
-        };
-
-        mockedHttp.patch.mockResolvedValue({ data: mockFolder });
-
-        const updateDto: UpdateAudioFolderDto = {
-          name: 'Updated Folder',
-          description: 'Updated description',
-        };
-
-        const result = await audioService.updateFolder('folder-1', updateDto);
-
-        expect(result).toEqual(mockFolder);
-        expect(mockedHttp.patch).toHaveBeenCalledWith(
-          '/api/audio/folders/folder-1',
-          updateDto,
-        );
-      });
-
-      it('should handle errors when updating a folder', async () => {
-        const error = new Error('Failed to update folder');
-        mockedHttp.patch.mockRejectedValue(error);
-
-        const updateDto: UpdateAudioFolderDto = {
-          name: 'Updated Folder',
-        };
-
-        await expect(audioService.updateFolder('folder-1', updateDto)).rejects.toThrow(error);
-      });
-    });
-
-    describe('deleteFolder', () => {
-      it('should delete a folder successfully', async () => {
-        mockedHttp.delete.mockResolvedValue({});
-
-        await audioService.deleteFolder('folder-1');
-
-        expect(mockedHttp.delete).toHaveBeenCalledWith('/api/audio/folders/folder-1');
-      });
-
-      it('should handle errors when deleting a folder', async () => {
-        const error = new Error('Failed to delete folder');
-        mockedHttp.delete.mockRejectedValue(error);
-
-        await expect(audioService.deleteFolder('folder-1')).rejects.toThrow(error);
-      });
-    });
-  });
-
   describe('Audio File Management', () => {
     describe('uploadFile', () => {
       it('should upload an audio file successfully', async () => {
         const mockResponse: UploadAudioResponse = {
           id: 'audio-1',
           projectId: 'project-1',
-          folderId: 'folder-1',
           name: 'test-audio.mp3',
-          filePath: '/uploads/audio/test-audio.mp3',
+          storagePath: 'meetings/2024',
           fileSize: 1024000,
           fileType: 'audio/mpeg',
           status: AudioStatus.READY,
@@ -229,7 +54,7 @@ describe('AudioService', () => {
         const result = await audioService.uploadFile(
           mockFile,
           'project-1',
-          'folder-1',
+          'meetings/2024',
           onUploadProgress,
         );
 
@@ -244,13 +69,12 @@ describe('AudioService', () => {
         );
       });
 
-      it('should upload a file without folder ID', async () => {
+      it('should upload a file without storage path', async () => {
         const mockResponse: UploadAudioResponse = {
           id: 'audio-1',
           projectId: 'project-1',
-          folderId: null,
           name: 'test-audio.mp3',
-          filePath: '/uploads/audio/test-audio.mp3',
+          storagePath: '',
           fileSize: 1024000,
           fileType: 'audio/mpeg',
           status: AudioStatus.READY,
@@ -288,9 +112,8 @@ describe('AudioService', () => {
             {
               id: 'audio-1',
               projectId: 'project-1',
-              folderId: 'folder-1',
               name: 'test-audio.mp3',
-              filePath: '/uploads/audio/test-audio.mp3',
+              storagePath: 'meetings/2024',
               fileSize: 1024000,
               fileType: 'audio/mpeg',
               duration: 120,
@@ -316,7 +139,6 @@ describe('AudioService', () => {
 
         const query: QueryAudioFileDto = {
           projectId: 'project-1',
-          folderId: 'folder-1',
           page: 1,
           pageSize: 10,
         };
@@ -346,9 +168,8 @@ describe('AudioService', () => {
         const mockFile: AudioFile = {
           id: 'audio-1',
           projectId: 'project-1',
-          folderId: 'folder-1',
           name: 'test-audio.mp3',
-          filePath: '/uploads/audio/test-audio.mp3',
+          storagePath: 'meetings/2024',
           fileSize: 1024000,
           fileType: 'audio/mpeg',
           duration: 120,
@@ -386,9 +207,8 @@ describe('AudioService', () => {
         const mockFile: AudioFile = {
           id: 'audio-1',
           projectId: 'project-1',
-          folderId: 'folder-1',
           name: 'updated-audio.mp3',
-          filePath: '/uploads/audio/test-audio.mp3',
+          storagePath: 'meetings/2024',
           fileSize: 1024000,
           fileType: 'audio/mpeg',
           duration: 120,
@@ -451,9 +271,8 @@ describe('AudioService', () => {
         const mockFile: AudioFile = {
           id: 'audio-1',
           projectId: 'project-1',
-          folderId: null,
           name: 'test-audio.mp3',
-          filePath: '/uploads/audio/test-audio.mp3',
+          storagePath: '',
           fileSize: 1024000,
           fileType: 'audio/mpeg',
           duration: null,
@@ -510,29 +329,6 @@ describe('AudioService', () => {
         mockedHttp.get.mockRejectedValue(error);
 
         await expect(audioService.countByProject('project-1')).rejects.toThrow(error);
-      });
-    });
-
-    describe('countByFolder', () => {
-      it('should get audio file count for a folder', async () => {
-        const mockResponse: AudioStatsResponse = {
-          folderId: 'folder-1',
-          count: 5,
-        };
-
-        mockedHttp.get.mockResolvedValue({ data: mockResponse });
-
-        const result = await audioService.countByFolder('folder-1');
-
-        expect(result).toEqual(mockResponse);
-        expect(mockedHttp.get).toHaveBeenCalledWith('/api/audio/stats/folder/folder-1');
-      });
-
-      it('should handle errors when counting by folder', async () => {
-        const error = new Error('Failed to count by folder');
-        mockedHttp.get.mockRejectedValue(error);
-
-        await expect(audioService.countByFolder('folder-1')).rejects.toThrow(error);
       });
     });
   });

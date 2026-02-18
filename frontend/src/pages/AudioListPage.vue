@@ -40,45 +40,41 @@
       <!-- 操作栏 -->
       <div class="toolbar">
         <div class="toolbar-left">
-          <el-select
-            v-model="selectedProjectId"
-            placeholder="选择项目"
-            style="width: 200px"
-            @change="handleProjectChange"
-          >
-            <el-option
-              v-for="project in projects"
-              :key="project.id"
-              :label="project.name"
-              :value="project.id"
-            />
-          </el-select>
+          <!-- 搜索区域 -->
+          <div class="search-area">
+            <el-select
+              v-model="selectedProjectId"
+              placeholder="选择项目"
+              style="width: 180px"
+              @change="handleProjectChange"
+            >
+              <el-option
+                v-for="project in projects"
+                :key="project.id"
+                :label="project.name"
+                :value="project.id"
+              />
+            </el-select>
 
-          <el-select
-            v-model="selectedFolderId"
-            placeholder="选择文件夹"
-            style="width: 200px"
-            @change="handleFolderChange"
-          >
-            <el-option
-              v-for="folder in folders"
-              :key="folder.id"
-              :label="folder.name"
-              :value="folder.id"
-            />
-          </el-select>
+            <el-input
+              v-model="searchKeyword"
+              placeholder="搜索音频文件"
+              style="width: 220px"
+              clearable
+              @input="handleSearch"
+            >
+              <template #prefix>
+                <el-icon><Search /></el-icon>
+              </template>
+            </el-input>
+          </div>
 
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索音频文件"
-            style="width: 200px"
-            clearable
-            @input="handleSearch"
-          >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
-          </el-input>
+          <!-- 文件夹树 -->
+          <VirtualFolderTree
+            :audio-files="audioFiles"
+            :current-path="selectedPath"
+            @folder-select="handlePathChange"
+          />
         </div>
 
         <div class="toolbar-right">
@@ -166,6 +162,22 @@
       :close-on-click-modal="false"
       @close="handleDialogClose"
     >
+      <div class="upload-form">
+        <div class="form-item">
+          <label>存储路径：</label>
+          <el-input
+            v-model="uploadStoragePath"
+            placeholder="例如：会议记录/2024/Q1"
+            clearable
+          >
+            <template #prefix>
+              <el-icon><Folder /></el-icon>
+            </template>
+          </el-input>
+          <div class="form-tip">路径用 / 分隔，会自动创建虚拟文件夹</div>
+        </div>
+      </div>
+      
       <el-upload
         ref="uploadRef"
         :auto-upload="false"
@@ -197,6 +209,37 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 播放对话框 -->
+    <el-dialog
+      v-model="playDialogVisible"
+      :title="`播放：${currentPlayingAudio?.name || ''}`"
+      width="900px"
+      :close-on-click-modal="false"
+      @close="handlePlayDialogClose"
+    >
+      <div class="play-dialog-content">
+        <AudioPlayer
+          v-if="playDialogVisible && currentPlayingAudio"
+          :audio-url="getAudioStreamUrl(currentPlayingAudio.id)"
+          :duration="currentPlayingAudio.duration"
+          @timeupdate="handleTimeUpdate"
+          @play="handlePlayStart"
+          @pause="handlePlayPause"
+          @stop="handlePlayStop"
+        />
+        
+        <!-- 音频信息 -->
+        <div class="audio-info" v-if="currentPlayingAudio">
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="文件名">{{ currentPlayingAudio.name }}</el-descriptions-item>
+            <el-descriptions-item label="文件大小">{{ formatFileSize(currentPlayingAudio.fileSize) }}</el-descriptions-item>
+            <el-descriptions-item label="文件类型">{{ currentPlayingAudio.fileType }}</el-descriptions-item>
+            <el-descriptions-item label="时长">{{ formatDuration(currentPlayingAudio.duration) }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -205,11 +248,13 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage, ElMessageBox, type UploadFile, type UploadInstance } from 'element-plus'
-import { Search, Upload, UploadFilled } from '@element-plus/icons-vue'
+import { Search, Upload, UploadFilled, Folder } from '@element-plus/icons-vue'
 import audioService from '@/services/audio.service'
 import { projectService } from '@/services/project.service'
-import type { AudioFile, AudioFolder } from '@/types/audio'
+import type { AudioFile } from '@/types/audio'
 import type { Project } from '@/types/project'
+import VirtualFolderTree from '@/components/VirtualFolderTree.vue'
+import AudioPlayer from '@/components/AudioPlayer.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -217,10 +262,9 @@ const userStore = useUserStore()
 
 // 数据
 const projects = ref<Project[]>([])
-const folders = ref<AudioFolder[]>([])
 const audioFiles = ref<AudioFile[]>([])
 const selectedProjectId = ref<string>(route.query.projectId as string || '')
-const selectedFolderId = ref<string>(route.query.folderId as string || '')
+const selectedPath = ref<string>(route.query.path as string || '')
 const searchKeyword = ref('')
 const loading = ref(false)
 const currentPage = ref(1)
@@ -230,8 +274,13 @@ const total = ref(0)
 // 上传相关
 const uploadDialogVisible = ref(false)
 const uploadRef = ref<UploadInstance>()
+const uploadStoragePath = ref<string>('')
 const fileList = ref<UploadFile[]>([])
 const uploading = ref(false)
+
+// 播放相关
+const playDialogVisible = ref(false)
+const currentPlayingAudio = ref<AudioFile | null>(null)
 
 // 处理登出
 const handleLogout = () => {
@@ -253,20 +302,6 @@ const loadProjects = async () => {
   }
 }
 
-// 加载文件夹列表
-const loadFolders = async () => {
-  if (!selectedProjectId.value) {
-    folders.value = []
-    return
-  }
-
-  try {
-    folders.value = await audioService.getFolders(selectedProjectId.value)
-  } catch (error) {
-    ElMessage.error('加载文件夹列表失败')
-  }
-}
-
 // 加载音频文件列表
 const loadAudioFiles = async () => {
   if (!selectedProjectId.value) {
@@ -279,7 +314,6 @@ const loadAudioFiles = async () => {
   try {
     const response = await audioService.getAudioFiles({
       projectId: selectedProjectId.value,
-      folderId: selectedFolderId.value || undefined,
       name: searchKeyword.value || undefined,
       page: currentPage.value,
       pageSize: pageSize.value,
@@ -295,14 +329,14 @@ const loadAudioFiles = async () => {
 
 // 处理项目变化
 const handleProjectChange = () => {
-  selectedFolderId.value = ''
+  selectedPath.value = ''
   currentPage.value = 1
-  loadFolders()
   loadAudioFiles()
 }
 
-// 处理文件夹变化
-const handleFolderChange = () => {
+// 处理路径变化
+const handlePathChange = (path: string) => {
+  selectedPath.value = path
   currentPage.value = 1
   loadAudioFiles()
 }
@@ -348,6 +382,7 @@ const handleFileRemove = (file: UploadFile, newFileList: UploadFile[]) => {
 // 处理对话框关闭
 const handleDialogClose = () => {
   fileList.value = []
+  uploadStoragePath.value = ''
   uploadRef.value?.clearFiles()
 }
 
@@ -366,7 +401,7 @@ const handleConfirmUpload = async () => {
       await audioService.uploadFile(
         file.raw as File,
         selectedProjectId.value,
-        selectedFolderId.value || undefined,
+        uploadStoragePath.value || undefined,
       )
       ElMessage.success(`${file.name} 上传成功`)
     } catch (error) {
@@ -378,6 +413,7 @@ const handleConfirmUpload = async () => {
   uploading.value = false
   uploadDialogVisible.value = false
   fileList.value = []
+  uploadStoragePath.value = ''
   // 清空上传组件的文件列表
   uploadRef.value?.clearFiles()
   loadAudioFiles()
@@ -391,7 +427,61 @@ const handleConfirmUpload = async () => {
 
 // 处理播放
 const handlePlay = (audioFile: AudioFile) => {
-  ElMessage.info('播放功能开发中...')
+  if (!audioFile.id) {
+    ElMessage.error('音频文件ID不存在')
+    return
+  }
+
+  // 检查音频文件状态
+  if (audioFile.status !== 'ready') {
+    ElMessage.warning(`音频文件状态为：${audioFile.status}，无法播放`)
+    return
+  }
+
+  currentPlayingAudio.value = audioFile
+  playDialogVisible.value = true
+  
+  console.log('播放音频:', {
+    id: audioFile.id,
+    name: audioFile.name,
+    url: getAudioStreamUrl(audioFile.id),
+    status: audioFile.status
+  })
+}
+
+// 获取音频流式传输URL
+const getAudioStreamUrl = (audioId: string): string => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+  const url = `${baseUrl}/audio/${audioId}/stream`
+  console.log('音频URL:', url)
+  return url
+}
+
+// 处理播放对话框关闭
+const handlePlayDialogClose = () => {
+  playDialogVisible.value = false
+  currentPlayingAudio.value = null
+}
+
+// 处理时间更新
+const handleTimeUpdate = (currentTime: number) => {
+  // 可以在这里处理时间更新逻辑
+  console.log('播放时间:', currentTime)
+}
+
+// 处理播放开始
+const handlePlayStart = () => {
+  console.log('播放开始')
+}
+
+// 处理播放暂停
+const handlePlayPause = () => {
+  console.log('播放暂停')
+}
+
+// 处理播放停止
+const handlePlayStop = () => {
+  console.log('播放停止')
 }
 
 // 处理删除
@@ -470,7 +560,6 @@ const getStatusText = (status: string): string => {
 onMounted(async () => {
   await loadProjects()
   if (selectedProjectId.value) {
-    await loadFolders()
     await loadAudioFiles()
   }
 })
@@ -550,7 +639,7 @@ onMounted(async () => {
 .toolbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 24px;
   padding: 16px;
   background: white;
@@ -560,7 +649,15 @@ onMounted(async () => {
 
 .toolbar-left {
   display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.search-area {
+  display: flex;
   gap: 12px;
+  align-items: center;
+  padding: 4px 0;
 }
 
 .toolbar-right {
@@ -583,6 +680,27 @@ onMounted(async () => {
   border-top: 1px solid #e5e7eb;
 }
 
+.upload-form {
+  margin-bottom: 20px;
+}
+
+.form-item {
+  margin-bottom: 16px;
+}
+
+.form-item label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-tip {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #999;
+}
+
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
@@ -593,5 +711,20 @@ onMounted(async () => {
   font-size: 67px;
   color: var(--el-text-color-secondary);
   margin: 40px 0 16px;
+}
+
+.play-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: hidden; /* 防止内容溢出弹窗 */
+  max-width: 100%; /* 确保不超出容器 */
+}
+
+.audio-info {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  overflow-x: auto; /* 允许表格横向滚动 */
 }
 </style>

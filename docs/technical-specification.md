@@ -430,16 +430,15 @@ CREATE INDEX idx_projects_status ON projects(status);
 CREATE TABLE audio_files (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  folder_id UUID REFERENCES audio_folders(id) ON DELETE SET NULL,
   file_name VARCHAR(255) NOT NULL,
-  file_path VARCHAR(500) NOT NULL, -- MinIO 路径
+  storage_path VARCHAR(1000) NOT NULL, -- 文件存储路径，如：'会议记录/2024/Q1/会议001.mp3'
   file_size BIGINT NOT NULL,
   format VARCHAR(50) NOT NULL, -- 'mp3', 'wav', 'flac', etc.
   duration DECIMAL(10,3), -- 时长（秒）
   sample_rate INTEGER, -- 采样率
   channels INTEGER, -- 声道数
   metadata JSONB DEFAULT '{}', -- 额外元数据
-  storage_key VARCHAR(500) NOT NULL,
+  storage_key VARCHAR(500) NOT NULL, -- MinIO 存储键
   upload_status VARCHAR(50) DEFAULT 'completed', -- 'uploading', 'completed', 'failed'
   ai_status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'processing', 'completed', 'failed'
   created_by UUID NOT NULL REFERENCES users(id),
@@ -449,30 +448,19 @@ CREATE TABLE audio_files (
 );
 
 CREATE INDEX idx_audio_files_project ON audio_files(project_id);
-CREATE INDEX idx_audio_files_folder ON audio_files(folder_id);
+CREATE INDEX idx_audio_files_path ON audio_files(project_id, storage_path); -- 用于路径查询
 CREATE INDEX idx_audio_files_status ON audio_files(ai_status);
 CREATE INDEX idx_audio_files_created ON audio_files(created_at DESC);
 ```
 
-#### 6. 音频文件夹表 (audio_folders)
+**说明**：
+- 移除了 `folder_id` 字段，音频不再与文件夹表关联
+- 添加了 `storage_path` 字段，用于存储文件在项目中的虚拟路径
+- 前端根据 `storage_path` 字段构建虚拟文件夹树
+- 支持多级路径嵌套，路径分隔符为 `/`
+- 例如：`storage_path = '会议记录/2024/Q1/会议001.mp3'`
 
-```sql
-CREATE TABLE audio_folders (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  parent_id UUID REFERENCES audio_folders(id) ON DELETE CASCADE,
-  name VARCHAR(255) NOT NULL,
-  path VARCHAR(1000) NOT NULL, -- 文件夹路径
-  created_by UUID NOT NULL REFERENCES users(id),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_folders_project ON audio_folders(project_id);
-CREATE INDEX idx_folders_parent ON audio_folders(parent_id);
-```
-
-#### 7. 标注表 (annotations)
+#### 6. 标注表 (annotations)
 
 ```sql
 CREATE TABLE annotations (
@@ -1505,18 +1493,7 @@ POST   /api/v1/audio/:id/ai-process   # 触发 AI 处理
 GET    /api/v1/audio/:id/ai-status    # 获取 AI 处理状态
 ```
 
-#### 6. 文件夹模块 (`/folders`)
-
-```
-GET    /api/v1/folders                # 文件夹列表
-POST   /api/v1/folders                # 创建文件夹
-GET    /api/v1/folders/:id            # 获取文件夹详情
-PUT    /api/v1/folders/:id            # 更新文件夹
-DELETE /api/v1/folders/:id            # 删除文件夹
-POST   /api/v1/folders/:id/move       # 移动文件夹
-```
-
-#### 7. 标注模块 (`/annotations`)
+#### 6. 标注模块 (`/annotations`)
 
 ```
 GET    /api/v1/annotations            # 标注列表
