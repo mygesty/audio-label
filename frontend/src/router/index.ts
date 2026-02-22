@@ -74,13 +74,13 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/annotation/:audioId',
+    path: '/annotation',
     name: 'Annotation',
     component: () => import('@/pages/AnnotationPage.vue'),
     meta: { requiresAuth: true },
   },
   {
-    path: '/review/:audioId',
+    path: '/review',
     name: 'Review',
     component: () => import('@/pages/ReviewPage.vue'),
     meta: { requiresAuth: true },

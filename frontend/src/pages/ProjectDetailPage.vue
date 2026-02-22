@@ -336,8 +336,13 @@ const handleUploadAudio = () => {
 
 const handleStartAnnotation = () => {
   if (!project.value) return
-  // TODO: 跳转到标注页面
-  ElMessage.info('标注功能开发中...')
+  // 跳转到音频列表页面，传递项目ID
+  router.push({
+    path: '/audio-list',
+    query: {
+      projectId: project.value.id,
+    },
+  })
 }
 
 const handleViewTasks = () => {

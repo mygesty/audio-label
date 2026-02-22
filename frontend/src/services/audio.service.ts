@@ -119,6 +119,71 @@ class AudioService {
     );
     return response.data;
   }
+
+  // ============ 波形相关方法 ============
+
+  /**
+   * 获取波形数据
+   * @param audioId 音频文件ID
+   * @param samplesPerPixel 每像素采样点数（默认 100）
+   * @returns 波形数据
+   */
+  async getWaveformData(
+    audioId: string,
+    samplesPerPixel: number = 100,
+  ): Promise<{
+    audioId: string;
+    data: number[];
+    samplesPerPixel: number;
+    duration: number;
+    sampleRate: number;
+    channels: number;
+    fromCache: boolean;
+    generatedAt: string;
+  }> {
+    const response = await http.get(`${this.basePath}/${audioId}/waveform`, {
+      params: { samplesPerPixel },
+    });
+    return response.data;
+  }
+
+  /**
+   * 获取波形统计信息
+   * @param audioId 音频文件ID
+   * @returns 波形统计信息
+   */
+  async getWaveformStats(audioId: string): Promise<{
+    audioId: string;
+    cacheStatus: {
+      overview: boolean;
+      detail: boolean;
+      zoom: boolean;
+    };
+    duration: number;
+    lastUpdatedAt: string;
+  }> {
+    const response = await http.get(`${this.basePath}/${audioId}/waveform/stats`);
+    return response.data;
+  }
+
+  /**
+   * 清除波形缓存
+   * @param audioId 音频文件ID
+   * @param samplesPerPixel 可选：特定缩放级别
+   */
+  async clearWaveformCache(
+    audioId: string,
+    samplesPerPixel?: number,
+  ): Promise<void> {
+    await http.delete(`${this.basePath}/${audioId}/waveform/cache`, {
+      params: { samplesPerPixel },
+    });
+  }
 }
 
-export default new AudioService();
+// 导出单例实例
+const audioService = new AudioService();
+export default audioService;
+
+// 导出类型
+export * from '../types/audio';

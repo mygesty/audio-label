@@ -3,10 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AudioService } from './audio.service';
 import { AudioController } from './audio.controller';
 import { AudioFile } from './entities/audio-file.entity';
+import { WaveformCache } from './entities/waveform-cache.entity';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AudioFile]), AuthModule],
+  imports: [TypeOrmModule.forFeature([AudioFile, WaveformCache]), AuthModule],
   controllers: [AudioController],
   providers: [AudioService],
   exports: [AudioService],

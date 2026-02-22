@@ -20,6 +20,7 @@
 | 2 | 首页 | [page-首页.md](./page-首页.md) | page-首页.html | P0 | ✅ |
 | 3 | 音频列表 | [page-音频列表.md](./page-音频列表.md) | page-音频列表.html | P0 | ✅ |
 | 4 | 标注界面 | [page-标注界面.md](./page-标注界面.md) | page-标注界面.html | P0 | ✅ |
+| 4-2 | 标注界面（新布局） | [page-标注界面-新布局.md](./page-标注界面-新布局.md) | - | P0 | ⭐ 新版 |
 | 5 | 审核界面 | [page-审核界面.md](./page-审核界面.md) | page-审核界面.html | P1 | ✅ |
 | 6 | 任务列表 | [page-任务列表.md](./page-任务列表.md) | page-任务列表.html | P1 | ✅ |
 
@@ -34,7 +35,8 @@
 - [登录页](../html-prototype/page-登录页.html)
 - [首页](../html-prototype/page-首页.html)
 - [音频列表](../html-prototype/page-音频列表.html)
-- [标注界面](../html-prototype/page-标注界面.html) ⭐ 核心页面
+- [标注界面](../html-prototype/page-标注界面.html) ⭐ 核心页面（旧版布局）
+- [标注界面（新布局）](./page-标注界面-新布局.md) ⭐ 核心页面（上中下布局）
 - [审核界面](../html-prototype/page-审核界面.html)
 - [任务列表](../html-prototype/page-任务列表.html)
 

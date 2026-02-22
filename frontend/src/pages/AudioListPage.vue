@@ -117,7 +117,7 @@
               {{ formatDate(row.createdAt) }}
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" fixed="right">
+          <el-table-column label="操作" width="200" fixed="right">
             <template #default="{ row }">
               <el-button
                 type="primary"
@@ -126,6 +126,14 @@
                 @click="handlePlay(row)"
               >
                 播放
+              </el-button>
+              <el-button
+                type="success"
+                link
+                size="small"
+                @click="handleAnnotate(row)"
+              >
+                标注
               </el-button>
               <el-button
                 type="danger"
@@ -446,6 +454,29 @@ const handlePlay = (audioFile: AudioFile) => {
     name: audioFile.name,
     url: getAudioStreamUrl(audioFile.id),
     status: audioFile.status
+  })
+}
+
+// 处理标注
+const handleAnnotate = (audioFile: AudioFile) => {
+  if (!audioFile.id) {
+    ElMessage.error('音频文件ID不存在')
+    return
+  }
+
+  // 检查音频文件状态
+  if (audioFile.status !== 'ready') {
+    ElMessage.warning(`音频文件状态为：${audioFile.status}，无法标注`)
+    return
+  }
+
+  // 跳转到标注页面
+  router.push({
+    path: '/annotation',
+    query: {
+      audioId: audioFile.id,
+      projectId: selectedProjectId.value,
+    },
   })
 }
 

@@ -22,6 +22,7 @@ import { AudioService } from './audio.service';
 import { CreateAudioFileDto } from './dto/create-audio-file.dto';
 import { UpdateAudioFileDto } from './dto/update-audio-file.dto';
 import { QueryAudioFileDto } from './dto/query-audio-file.dto';
+import { GetWaveformDto, WaveformZoomLevel } from './dto/waveform.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -393,5 +394,77 @@ export class AudioController {
 
     // 流式传输
     stream.pipe(raw);
+  }
+
+  // ============ 波形相关端点 ============
+
+  /**
+   * 获取波形数据
+   * GET /api/audio/:id/waveform
+   *
+   * @param id 音频文件ID
+   * @param query 波形参数
+   * @returns 波形数据
+   */
+  @Get(':id/waveform')
+  async getWaveformData(
+    @Param('id') id: string,
+    @Query() query: GetWaveformDto,
+  ) {
+    const { samplesPerPixel } = query;
+
+    // 如果没有指定采样率，默认使用详细级
+    const effectiveSamplesPerPixel =
+      samplesPerPixel || WaveformZoomLevel.DETAIL;
+
+    return await this.audioService.getWaveformData(
+      id,
+      effectiveSamplesPerPixel,
+    );
+  }
+
+  /**
+   * 获取波形统计信息
+   * GET /api/audio/:id/waveform/stats
+   *
+   * @param id 音频文件ID
+   * @returns 波形统计信息
+   */
+  @Get(':id/waveform/stats')
+  async getWaveformStats(@Param('id') id: string) {
+    return await this.audioService.getWaveformStats(id);
+  }
+
+  /**
+   * 清除波形缓存
+   * DELETE /api/audio/:id/waveform/cache
+   *
+   * @param id 音频文件ID
+   * @param query 可选：特定缩放级别
+   * @returns 操作结果
+   */
+  @Delete(':id/waveform/cache')
+  @HttpCode(HttpStatus.OK)
+  async clearWaveformCache(
+    @Param('id') id: string,
+    @Query() query: { samplesPerPixel?: number },
+  ) {
+    await this.audioService.clearWaveformCache(id, query.samplesPerPixel);
+    return { message: '波形缓存已清除' };
+  }
+
+  /**
+   * 批量清理过期缓存（管理员）
+   * POST /api/audio/waveform/cleanup
+   *
+   * @param body 清理参数
+   * @returns 清理结果
+   */
+  @Post('waveform/cleanup')
+  @HttpCode(HttpStatus.OK)
+  async cleanupOldCache(@Body() body: { days?: number }) {
+    const { days = 30 } = body;
+    const count = await this.audioService.cleanupOldCache(days);
+    return { message: `已清理 ${count} 条过期缓存记录` };
   }
 }
